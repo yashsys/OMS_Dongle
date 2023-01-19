@@ -1,0 +1,17 @@
+D:\OMS_Dongle\bin\Debug\OMS_Dongle.exe.config
+D:\OMS_Dongle\bin\Debug\OMS_Dongle.exe.manifest
+D:\OMS_Dongle\bin\Debug\OMS_Dongle.application
+D:\OMS_Dongle\bin\Debug\OMS_Dongle.exe
+D:\OMS_Dongle\bin\Debug\OMS_Dongle.pdb
+D:\OMS_Dongle\bin\Debug\OMS_Dongle.xml
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.vbprojAssemblyReference.cache
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.OMS_Dongle.resources
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.Resources.resources
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.vbproj.GenerateResource.cache
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.vbproj.CoreCompileInputs.cache
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.TrustInfo.xml
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.exe.manifest
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.application
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.exe
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.xml
+D:\OMS_Dongle\obj\Debug\OMS_Dongle.pdb
