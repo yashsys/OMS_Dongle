@@ -1,0 +1,3 @@
+Module        : Zip File M:\VB_Prog_Data_Backup\OMS_Soft_Data\FRI\OMSSoft-YSIC-001-001-20222023_192-168-100-124_Full.BAK
+Date Time     : 20/01/2023 12:46:35
+Error Message : The system cannot find the file specified

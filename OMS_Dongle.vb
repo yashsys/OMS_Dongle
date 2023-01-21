@@ -1513,12 +1513,15 @@ Public Class OMS_Dongle
         adoCon_Company = New SqlConnection(connetionString)
         Try
             adoCon_Company.Open()
+            Dim strDataPath As String
             Dim adapter As New SqlDataAdapter
             Dim adoRS_Company As New DataSet
             Dim adocommand As SqlCommand
-            Dim blnUpload_RSInfo As Boolean
+            Dim blnCentral_Backup As Boolean
+            Dim strTempDataPath As String
+            Dim strCentral_Database As String
 
-            adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail ORDER BY Company_Id", adoCon_Company)
+            adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) AND ISNULL(Next_Backup,GETDATE()-1) < GETDATE()) OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
             adapter.Fill(adoRS_Company)
             adapter.Dispose()
             For i = 0 To adoRS_Company.Tables(0).Rows.Count - 1
@@ -1530,49 +1533,121 @@ Public Class OMS_Dongle
                         glngFinancial_Year = .Item("Financial_Year")
 
                         gstrCompany_Id = .Item("Company_Id") & ""
-
+                        strCentral_Database = .Item("Central_Database") & ""
                         strHead_Office_Id = .Item("Head_Office_Id") & ""
                         strLocation_ID = .Item("Location_ID") & ""
                         gstrCompany_Name = .Item("Company_Desc").ToString() & ""
 
-                        strHO_Company_Code = ""
-                        Get_HO_Company_Code()
-                        strExe_Version = ""
-                        Get_Location_Go_Live()
-                        blnUpload_RSInfo = False
-
-                        If Download_RSInfo("/RETAIL_SOFT/" & IIf(strHO_Company_Code <> gstrCompany_Id, strHO_Company_Code & "/" & gstrCompany_Id, gstrCompany_Id) & "/Download", gstrCompany_Id) = True Then
-                            blnUpload_RSInfo = True
+                        strDataPath = "M:\VB_Prog_Data_Backup\OMS_Soft_Data\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
+                        If Not Directory.Exists(strDataPath) Then
+                            Directory.CreateDirectory(strDataPath)
                         End If
-                        If Update_RSLog(gstrCompany_Id) = True Or blnUpload_RSInfo = True Then
-                            If Search_Lock() = True Then
-                                strSQL_String = "BEGIN"
-                                strSQL_String = strSQL_String & vbCrLf & "  DELETE FROM [RetailSoft_Company].DBO.tblRsInfo_Up WHERE Company_Id='" & gstrCompany_Id & "'"
-                                strSQL_String = strSQL_String & vbCrLf & "  INSERT INTO [RetailSoft_Company].DBO.tblRsInfo_Up(Company_Id, Exe_Date,Exe_Size,Exe_Version,IP_Address,Server_Name,Info,Company,HO,Branch,Server_info,Go_Live) "
-                                strSQL_String = strSQL_String & vbCrLf & "  SELECT TOP 1 '" & gstrCompany_Id & "', Exe_Date,REPLACE(Exe_Size,',',''),'" & strExe_Version & "',IP_Address,Server_Name,'" & Replace(Replace(gstrLicense_Information, "'", ""), ",", "") & "','" & gstrCompany_Id & " - " & Replace(Replace(gstrCompany_Name, "'", ""), ",", "") & "','" & RTrim(strHO_Desc) & "','" & RTrim(strBranch_Desc) & "','Server Info (" & gstrHasp_LockId & ") On Date : ' + CONVERT(VARCHAR,GETDATE(),103) + ' ' + CONVERT(VARCHAR,GETDATE(),108),'" & strOpening_Date & "' FROM [RetailSoft_Company].DBO.tblServer"
-                                strSQL_String = strSQL_String & vbCrLf & "END"
-
-                                adocommand = New SqlCommand(strSQL_String, adoCon_Company)
-                                adocommand.CommandTimeout = 0
-                                adocommand.ExecuteNonQuery()
+                        blnCentral_Backup = False
+                        If strCentral_Database <> "" Then
+                            If File.Exists(strDataPath & "\" & strCentral_Database & ".BAK") Then
+                                Dim objFile As FileInfo
+                                objFile = New FileInfo(strDataPath & "\" & strCentral_Database & ".BAK")
+                                
+                                If Math.Abs(DateDiff(DateInterval.Day, Now(), objFile.CreationTime)) > 0 Then
+                                    objFile.Delete()
+                                    blnCentral_Backup = True
+                                End If
+                            Else
+                                blnCentral_Backup = True
                             End If
                         End If
+                        If blnCentral_Backup = True Then
+                            strBackup_File = strCentral_Database & ".BAK"
 
-                        Upload_RSInfo("/RETAIL_SOFT/" & IIf(strHO_Company_Code <> gstrCompany_Id, strHO_Company_Code & "/" & gstrCompany_Id, gstrCompany_Id) & "/Upload", gstrCompany_Id)
+                            strTempDataPath = My.Application.Info.DirectoryPath & "\Schedule_Backup"
+                            If Directory.Exists(strTempDataPath) Then
+                                Directory.Delete(strTempDataPath, True)
+                            End If
+                            Directory.CreateDirectory(strTempDataPath)
+
+                            command = New SqlCommand
+                            command.Connection = adoCon_Company
+                            command.CommandTimeout = 0
+                            command.CommandText = "BACKUP DATABASE [" & strCentral_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT"
+                            command.ExecuteNonQuery()
+
+                            outputZip = strDataPath & "\" & strBackup_File
+
+                            If File.Exists(outputZip) Then
+                                File.Delete(outputZip)
+                            End If
+                            inputFolder = strTempDataPath & "\" & strBackup_File
+                            If Zip() = True Then
+                                Directory.Delete(strTempDataPath, True)
+                            End If
+                        End If
+                        strBackup_File = gstrPublication_Database & ".BAK"
+                        strTempDataPath = My.Application.Info.DirectoryPath & "\Schedule_Backup"
+                        If Directory.Exists(strTempDataPath) Then
+                            Directory.Delete(strTempDataPath, True)
+                        End If
+                        Directory.CreateDirectory(strTempDataPath)
+
+                        command = New SqlCommand
+                        command.Connection = adoCon_Company
+                        command.CommandTimeout = 0
+                        command.CommandText = "BACKUP DATABASE [" & gstrPublication_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT"
+                        command.ExecuteNonQuery()
+
+                        outputZip = strDataPath & "\" & gstrPublication_Database & "_" & Replace(gstrServer_IP_Address, ".", "-") & "_Full.BAK"
+
+                        If File.Exists(outputZip) Then
+                            File.Delete(outputZip)
+                        End If
+                        inputFolder = strTempDataPath & "\" & strBackup_File
+                        If Zip() = True Then
+                            Directory.Delete(strTempDataPath, True)
+                            command = New SqlCommand
+                            command.Connection = adoCon_Company
+                            command.CommandTimeout = 0
+                            command.CommandText = "UPDATE [OMSSoft_Company].DBO.tblCompany_Detail SET Backup_Schedule = 0, Next_Backup = GETDATE()+1 WHERE Company_Id = '" & gstrCompany_Id & "' AND Financial_Year = '" & glngFinancial_Year & "'"
+                            command.ExecuteNonQuery()
+                        End If
 
                     Catch ex2 As Exception
-                        Print_Error_Only("Server Schedule", ex2)
+                        Print_Error_Only("Backup Schedule", ex2)
                     End Try
                 End With
             Next
             'End If
         Catch ex1 As Exception
-            Print_Error_Only("Server_Schedule! ", ex1)
+            Print_Error_Only("Backup_Schedule! ", ex1)
         End Try
 
         adoCon_Company.Close()
         adoCon_Company.Dispose()
     End Sub
+
+    Private Function Zip() As Boolean
+        Dim objProcess As System.Diagnostics.Process
+        Try
+            objProcess = New System.Diagnostics.Process()
+            objProcess.StartInfo.FileName = My.Application.Info.DirectoryPath & "\DLL\7z.exe"
+            objProcess.StartInfo.Arguments = "a -tzip " + outputZip + " " + inputFolder & " -mx1"
+            objProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden
+            objProcess.Start()
+            'Wait until the process passes back an exit code 
+            objProcess.WaitForExit()
+            'Free resources associated with this process
+            objProcess.Close()
+
+            If File.Exists(outputZip) Then
+                Zip = True
+            Else
+                strError = "Zip File Creation Error"
+                Zip = False
+            End If
+        Catch ex1 As Exception
+            Print_Error_Only("Zip File " & outputZip, ex1)
+            strError = "Error Message : " & ex1.Message
+            Zip = False
+        End Try
+    End Function
 
     Private Sub Server_Schedule()
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=RetailSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
@@ -1722,10 +1797,10 @@ Public Class OMS_Dongle
                 'If InStr(1, gstrAllowed_Multiple_Companies_LockIds, gstrHasp_LockId) = 0 Then
                 '    Server_Schedule()
                 'ElseIf gstrHasp_LockId = "1917058163" Then
+                'End If
+                Backup_Schedule()
                 OMS_Event_SMS_Send()
                 Restore_RSInfo()
-
-                'End If
             End If
         End If
     End Sub
@@ -1882,7 +1957,7 @@ HO_Site_Again:
     End Function
 
     Private Sub Print_Error_Only(ByVal strSQL_String As String, ByRef objException As Exception)
-        Dim fileLoc As String = My.Application.Info.DirectoryPath & "\RS_Inbound_Error_" & WeekdayName(Weekday(Now(), vbMonday), False, vbMonday) & ".txt"
+        Dim fileLoc As String = My.Application.Info.DirectoryPath & "\OMS_Dongle_Error_" & WeekdayName(Weekday(Now(), vbMonday), False, vbMonday) & ".txt"
         Dim fs As FileStream = Nothing
         Dim strHead As String
         strHead = strSQL_String
