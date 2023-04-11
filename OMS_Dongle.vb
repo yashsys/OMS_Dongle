@@ -1436,10 +1436,8 @@ Public Class OMS_Dongle
                         adocommand.ExecuteNonQuery()
                     End If
                     strSQL_String = ""
-                    If CDate(strNext_SMS_On) < CDate(.Item("SMS_Date_Time")) Then
-                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Next_SMS_On = DATEADD(dd,1,Next_SMS_On), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                    ElseIf intRepeat_Event_Reminder = 1 Then
-                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = DATEADD(ww,1,Event_Date), SMS_From_Date = DATEADD(ww,1,SMS_From_Date), SMS_Date_Time = DATEADD(ww,1,SMS_Date_Time), Next_SMS_On = DATEADD(ww,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                    If intRepeat_Event_Reminder = 1 Then
+                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Next_SMS_On = DATEADD(ww,1,Next_SMS_On), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 2 Then
                         strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = DATEADD(mm,1,Event_Date), SMS_From_Date = DATEADD(mm,1,SMS_From_Date), SMS_Date_Time = DATEADD(mm,1,SMS_Date_Time), Next_SMS_On = DATEADD(mm,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 3 Then
@@ -1521,7 +1519,8 @@ Public Class OMS_Dongle
             Dim strTempDataPath As String
             Dim strCentral_Database As String
 
-            adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) AND ISNULL(Next_Backup,GETDATE()-1) < GETDATE()) OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
+            'adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) AND ISNULL(Next_Backup,GETDATE()-1) < GETDATE()) OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
+            adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE ISNULL(Next_Backup,GETDATE()-1) < GETDATE() OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
             adapter.Fill(adoRS_Company)
             adapter.Dispose()
             For i = 0 To adoRS_Company.Tables(0).Rows.Count - 1
@@ -1538,7 +1537,7 @@ Public Class OMS_Dongle
                         strLocation_ID = .Item("Location_ID") & ""
                         gstrCompany_Name = .Item("Company_Desc").ToString() & ""
 
-                        strDataPath = "M:\VB_Prog_Data_Backup\OMS_Soft_Data\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
+                        strDataPath = "E:\VB_Prog_Data_Backup\OMS_Soft_Data\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
                         If Not Directory.Exists(strDataPath) Then
                             Directory.CreateDirectory(strDataPath)
                         End If
@@ -1547,7 +1546,7 @@ Public Class OMS_Dongle
                             If File.Exists(strDataPath & "\" & strCentral_Database & ".BAK") Then
                                 Dim objFile As FileInfo
                                 objFile = New FileInfo(strDataPath & "\" & strCentral_Database & ".BAK")
-                                
+
                                 If Math.Abs(DateDiff(DateInterval.Day, Now(), objFile.CreationTime)) > 0 Then
                                     objFile.Delete()
                                     blnCentral_Backup = True
