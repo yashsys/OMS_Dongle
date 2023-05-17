@@ -1437,15 +1437,19 @@ Public Class OMS_Dongle
                     End If
                     strSQL_String = ""
                     If intRepeat_Event_Reminder = 1 Then
-                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Next_SMS_On = DATEADD(ww,1,Next_SMS_On), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        'strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Next_SMS_On = DATEADD(ww,1,Next_SMS_On), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(ww,1,SMS_From_Date) ELSE DATEADD(dd,1,Next_SMS_On) END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 2 Then
-                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = DATEADD(mm,1,Event_Date), SMS_From_Date = DATEADD(mm,1,SMS_From_Date), SMS_Date_Time = DATEADD(mm,1,SMS_Date_Time), Next_SMS_On = DATEADD(mm,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        'strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = DATEADD(mm,1,Event_Date), SMS_From_Date = DATEADD(mm,1,SMS_From_Date), SMS_Date_Time = DATEADD(mm,1,SMS_Date_Time), Next_SMS_On = DATEADD(mm,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,1,SMS_From_Date) ELSE DATEADD(dd,1,Next_SMS_On) END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 3 Then
-                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = DATEADD(qq,1,Event_Date), SMS_From_Date = DATEADD(qq,1,SMS_From_Date), SMS_Date_Time = DATEADD(qq,1,SMS_Date_Time), Next_SMS_On = DATEADD(qq,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        'strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = DATEADD(qq,1,Event_Date), SMS_From_Date = DATEADD(qq,1,SMS_From_Date), SMS_Date_Time = DATEADD(qq,1,SMS_Date_Time), Next_SMS_On = DATEADD(qq,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(qq,1,SMS_From_Date) ELSE DATEADD(dd,1,Next_SMS_On) END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 4 Then
-                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = DATEADD(mm,6,Event_Date), SMS_From_Date = DATEADD(mm,6,SMS_From_Date), SMS_Date_Time = DATEADD(mm,6,SMS_Date_Time), Next_SMS_On = DATEADD(mm,6,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        'strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = DATEADD(mm,6,Event_Date), SMS_From_Date = DATEADD(mm,6,SMS_From_Date), SMS_Date_Time = DATEADD(mm,6,SMS_Date_Time), Next_SMS_On = DATEADD(mm,6,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,6,SMS_From_Date) ELSE DATEADD(dd,1,Next_SMS_On) END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 5 Then
-                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = DATEADD(yyyy,1,Event_Date), SMS_From_Date = DATEADD(yyyy,1,SMS_From_Date), SMS_Date_Time = DATEADD(yyyy,1,SMS_Date_Time), Next_SMS_On = DATEADD(yyyy,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(yyyy,1,SMS_From_Date) ELSE DATEADD(dd,1,Next_SMS_On) END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     Else
                         strSQL_String = "UPDATE [OMSSoft_Company].dbo.tblEvent_Mast SET Next_SMS_On = NULL, Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     End If
@@ -1871,6 +1875,17 @@ HO_Site_Again:
                                         Else
                                             Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
                                         End If
+                                        strSQL_String = "BEGIN"
+                                        strSQL_String = strSQL_String & vbCrLf & "SET DATEFORMAT DMY"
+                                        strSQL_String = strSQL_String & vbCrLf & "UPDATE CSD SET CSD.Exe_Date  = RSI.Exe_Date, From_Period = LEFT(RSI.Info, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 3, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 5, 4), To_Period = SUBSTRING(RSI.Info, 9, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 11, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 13, 4)"
+                                        strSQL_String = strSQL_String & vbCrLf & "FROM tblClient_Site_Detail CSD"
+                                        strSQL_String = strSQL_String & vbCrLf & "INNER JOIN Restore_RSInfo RSI ON RSI.Company_Id = CSD.Site_Id"
+                                        strSQL_String = strSQL_String & vbCrLf & "WHERE CSD.Party_Id IN (SELECT Account_Id FROM tblAccount_Mast WHERE ISNULL(Client_Type,0)=0)"
+                                        strSQL_String = strSQL_String & vbCrLf & "END"
+
+                                        command = New SqlCommand(strSQL_String, adoRestore)
+                                        command.CommandTimeout = 0
+                                        command.ExecuteNonQuery()
                                     End If
                                 End If
                             Else
@@ -1883,7 +1898,6 @@ HO_Site_Again:
                         intUB = intUB - 1
                         GoTo HO_Site_Again
                     End If
-
                 End With
             Next
         Catch ex1 As Exception
