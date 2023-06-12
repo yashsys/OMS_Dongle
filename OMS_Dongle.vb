@@ -1875,6 +1875,7 @@ HO_Site_Again:
                                         Else
                                             Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
                                         End If
+                                        'TS-186 | System should NOT update the Client Site Master's Information received from Ctrl+F4 String for D-Mart ASL, AFPL & AEL clients.
                                         strSQL_String = "BEGIN"
                                         strSQL_String = strSQL_String & vbCrLf & "SET DATEFORMAT DMY"
                                         strSQL_String = strSQL_String & vbCrLf & "UPDATE CSD SET CSD.Exe_Date  = RSI.Exe_Date, From_Period = LEFT(RSI.Info, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 3, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 5, 4), To_Period = SUBSTRING(RSI.Info, 9, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 11, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 13, 4)"
