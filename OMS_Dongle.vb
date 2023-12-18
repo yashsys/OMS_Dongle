@@ -1383,7 +1383,7 @@ Public Class OMS_Dongle
     End Function
 
     Private Function OMS_Event_SMS_Send()
-        connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
+        connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Central_YSIPL;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
 
         Dim adoSMS As New SqlConnection(connetionString)
         Try
@@ -1401,12 +1401,12 @@ Public Class OMS_Dongle
             'strSQL_String = "SELECT * FROM tblEvent_Mast WHERE (Send_SMS=1 OR CAST(GETDATE() AS DATE)>Event_Date) AND GETDATE() > Next_SMS_On AND (Repeat_Option=0 OR Remainder_End_Date >= CAST(GETDATE() AS DATE))"
 
             strSQL_String = "Select EVN.*, EHM.Event_Head_Desc, MSM.Message_Desc, MSM.Message, MEM.Mobile_No AS Event_Member_Mobile_No, MEM1.Mobile_No AS SMS1_Mobile_No, MEM2.Mobile_No AS SMS2_Mobile_No, MEM3.Mobile_No AS SMS3_Mobile_No FROM tblEvent_Mast EVN"
-            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN [OMSSoft_Central_YSIPL].DBO.tblEvent_Head_Mast EHM ON EHM.Event_Head_Id = EVN.Event_Head_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN [OMSSoft_Central_YSIPL].DBO.tblMessage_Mast MSM ON MSM.Message_Id = EVN.Message_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN [OMSSoft_Central_YSIPL].DBO.tblMember_Mast MEM ON MEM.Member_Id = EVN.Event_Member_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN [OMSSoft_Central_YSIPL].DBO.tblMember_Mast MEM1 ON MEM1.Member_Id = EVN.SMS1_Member_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN [OMSSoft_Central_YSIPL].DBO.tblMember_Mast MEM2 ON MEM2.Member_Id = EVN.SMS2_Member_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN [OMSSoft_Central_YSIPL].DBO.tblMember_Mast MEM3 ON MEM3.Member_Id = EVN.SMS3_Member_Id"
+            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblEvent_Head_Mast EHM ON EHM.Event_Head_Id = EVN.Event_Head_Id"
+            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMessage_Mast MSM ON MSM.Message_Id = EVN.Message_Id"
+            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM ON MEM.Member_Id = EVN.Event_Member_Id"
+            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM1 ON MEM1.Member_Id = EVN.SMS1_Member_Id"
+            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM2 ON MEM2.Member_Id = EVN.SMS2_Member_Id"
+            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM3 ON MEM3.Member_Id = EVN.SMS3_Member_Id"
             strSQL_String = strSQL_String & vbCrLf & "WHERE (EVN.Send_SMS=1 OR CAST(GETDATE() AS DATE)>EVN.Event_Date) AND GETDATE() > EVN.Next_SMS_On AND (EVN.Repeat_Option=0 OR EVN.Remainder_End_Date >= CAST(GETDATE() AS DATE))"
 
             adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
@@ -1793,11 +1793,13 @@ Public Class OMS_Dongle
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=" & gstrPublication_Database & ";User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
         Dim adoCon_Stock As New SqlConnection(connetionString)
         Try
+
             adoCon_Stock.Open()
+
             Dim adapter As New SqlDataAdapter
             Dim adoRs_Stock As DataSet
 
-            strSQL_String = "Select Branch_Id, Branch_Desc, Opening_Date  FROM tblBranch_Mast WHERE Branch_Id='" & strLocation_ID & "'"
+            strSQL_String = "Select Branch_Id, Branch_Desc, Opening_Date FROM tblBranch_Mast WHERE Branch_Id='" & strLocation_ID & "'"
 
             command = New SqlCommand(strSQL_String, adoCon_Stock)
             command.CommandTimeout = 0
