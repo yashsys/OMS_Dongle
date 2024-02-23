@@ -1439,7 +1439,8 @@ Public Class OMS_Dongle
                     strNext_SMS_On = .Item("Next_SMS_On") & ""
 
                     'strMessage = strMessage & " Date : " & Format(.Item("Event_Date"), "dd/MM/yyyy") & ""
-                    If Val(.Item("Send_SMS") & "") = 1 And CDate(Now()) >= CDate(.Item("SMS_From_Date")) And CDate(Now()) <= CDate(.Item("SMS_Date_Time")) Then
+                    'MsgBox(Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy"))
+                    If Val(.Item("Send_SMS") & "") = 1 And CDate(Now()) >= CDate(.Item("SMS_From_Date")) And Format(CDate(Now()), "dd/MMM/yyyy") <= Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy") Then
                         strSQL_String = "BEGIN"
                         strSQL_String = strSQL_String & vbCrLf & "EXEC master.dbo.sp_configure 'show advanced options', 1"
                         strSQL_String = strSQL_String & vbCrLf & "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
@@ -1457,24 +1458,24 @@ Public Class OMS_Dongle
                         adocommand.CommandTimeout = 0
                         adocommand.ExecuteNonQuery()
                     End If
-                    'MsgBox(Replace(Trim(strMessage), "'", "''"))
+
                     strSQL_String = ""
                     If intRepeat_Event_Reminder = 1 Then
                         'strSQL_String = "UPDATE tblEvent_Mast SET Next_SMS_On = DATEADD(ww,1,Next_SMS_On), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(ww,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(ww,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 2 Then
                         'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(mm,1,Event_Date), SMS_From_Date = DATEADD(mm,1,SMS_From_Date), SMS_Date_Time = DATEADD(mm,1,SMS_Date_Time), Next_SMS_On = DATEADD(mm,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On)  ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On)  ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 3 Then
                         'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(qq,1,Event_Date), SMS_From_Date = DATEADD(qq,1,SMS_From_Date), SMS_Date_Time = DATEADD(qq,1,SMS_Date_Time), Next_SMS_On = DATEADD(qq,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(qq,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On)  ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(qq,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On)  ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 4 Then
                         'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(mm,6,Event_Date), SMS_From_Date = DATEADD(mm,6,SMS_From_Date), SMS_Date_Time = DATEADD(mm,6,SMS_Date_Time), Next_SMS_On = DATEADD(mm,6,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,6,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On)  ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,6,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On)  ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 5 Then
-                        strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(yyyy,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(yyyy,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     Else
-                        strSQL_String = "UPDATE tblEvent_Mast SET Next_SMS_On = NULL, Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Next_SMS_On = NULL, Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     End If
                     If strSQL_String <> "" Then
                         adocommand = New SqlCommand(strSQL_String, adoSMS)
@@ -1549,50 +1550,6 @@ Public Class OMS_Dongle
             Dim strCentral_Database As String
             Dim strCompany_Database As String
 
-            strCompany_Database = "OMSSoft_Company"
-            blnCompany_Backup = False
-            strDataPath = "E:\VB_Prog_Data_Backup\OMS_Soft_Data\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
-            'strDataPath = "D:\Backup\AEL\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
-            If strCompany_Database <> "" Then
-                If File.Exists(strDataPath & "\" & strCompany_Database & ".BAK") Then
-                    Dim objFile As FileInfo
-
-                    objFile = New FileInfo(strDataPath & "\" & strCompany_Database & ".BAK")
-
-                    If Math.Abs(DateDiff(DateInterval.Hour, Now(), objFile.CreationTime)) > 12 Then
-                        objFile.Delete()
-                        blnCompany_Backup = True
-                    End If
-                Else
-                    blnCompany_Backup = True
-                End If
-            End If
-            If blnCompany_Backup = True Then
-                strBackup_File = strCompany_Database & ".BAK"
-
-                strTempDataPath = My.Application.Info.DirectoryPath & "\Schedule_Backup"
-                If Directory.Exists(strTempDataPath) Then
-                    Directory.Delete(strTempDataPath, True)
-                End If
-                Directory.CreateDirectory(strTempDataPath)
-
-                command = New SqlCommand
-                command.Connection = adoCon_Company
-                command.CommandTimeout = 0
-                command.CommandText = "BACKUP DATABASE [" & strCompany_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT"
-                command.ExecuteNonQuery()
-
-                outputZip = strDataPath & "\" & strBackup_File
-
-                If File.Exists(outputZip) Then
-                    File.Delete(outputZip)
-                End If
-                inputFolder = strTempDataPath & "\" & strBackup_File
-                If Zip() = True Then
-                    Directory.Delete(strTempDataPath, True)
-                End If
-            End If
-
             'adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) AND ISNULL(Next_Backup,GETDATE()-1) < GETDATE()) OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
             adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE (ISNULL(Next_Backup,GETDATE()-1) < GETDATE() AND LEN(Financial_Year)=8) OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
             adapter.Fill(adoRS_Company)
@@ -1600,6 +1557,9 @@ Public Class OMS_Dongle
             For i = 0 To adoRS_Company.Tables(0).Rows.Count - 1
                 With adoRS_Company.Tables(0).Rows(i)
                     Try
+                        strDataPath = "E:\VB_Prog_Data_Backup\OMS_Soft_Data\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
+                        'strDataPath = "D:\Backup\AEL\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
+
                         gintAttachment = 0
                         gstrPublication_Database = "OMSSoft-" & .Item("Company_Id") & "-" & .Item("Head_Office_Id") & "-" & .Item("Location_Id") & "-" & .Item("Financial_Year")
 
@@ -1653,6 +1613,46 @@ Public Class OMS_Dongle
                             inputFolder = strTempDataPath & "\" & strBackup_File
                             If Zip() = True Then
                                 Directory.Delete(strTempDataPath, True)
+                            End If
+
+                            strCompany_Database = "OMSSoft_Company"
+                            blnCompany_Backup = False
+                            If File.Exists(strDataPath & "\" & strCompany_Database & ".BAK") Then
+                                Dim objFile_Com As FileInfo
+
+                                objFile_Com = New FileInfo(strDataPath & "\" & strCompany_Database & ".BAK")
+
+                                If Math.Abs(DateDiff(DateInterval.Hour, Now(), objFile_Com.CreationTime)) > 12 Then
+                                    objFile_Com.Delete()
+                                    blnCompany_Backup = True
+                                End If
+                            Else
+                                blnCompany_Backup = True
+                            End If
+                            If blnCompany_Backup = True Then
+                                strBackup_File = strCompany_Database & ".BAK"
+
+                                strTempDataPath = My.Application.Info.DirectoryPath & "\Schedule_Backup"
+                                If Directory.Exists(strTempDataPath) Then
+                                    Directory.Delete(strTempDataPath, True)
+                                End If
+                                Directory.CreateDirectory(strTempDataPath)
+
+                                command = New SqlCommand
+                                command.Connection = adoCon_Company
+                                command.CommandTimeout = 0
+                                command.CommandText = "BACKUP DATABASE [" & strCompany_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT"
+                                command.ExecuteNonQuery()
+
+                                outputZip = strDataPath & "\" & strBackup_File
+
+                                If File.Exists(outputZip) Then
+                                    File.Delete(outputZip)
+                                End If
+                                inputFolder = strTempDataPath & "\" & strBackup_File
+                                If Zip() = True Then
+                                    Directory.Delete(strTempDataPath, True)
+                                End If
                             End If
                         End If
                         strBackup_File = gstrPublication_Database & ".BAK"
