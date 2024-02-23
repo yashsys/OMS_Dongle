@@ -1428,8 +1428,12 @@ Public Class OMS_Dongle
                     If Len(Trim(.Item("SMS3_Mobile_No") & "")) = 10 And InStr(1, strMobile_No, Trim(.Item("SMS3_Mobile_No") & "")) = 0 Then
                         strMobile_No = strMobile_No & "," & Trim(.Item("SMS3_Mobile_No") & "")
                     End If
+                    If IsDBNull(.Item("Message")) = True Then
+                        strMessage = .Item("Event_Message") & ""
+                    Else
+                        strMessage = .Item("Message") & ""
+                    End If
 
-                    strMessage = .Item("Message") & ""
                     strMessage = Replace(strMessage, "<Event Head>", .Item("Event_Head_Desc") & "")
                     strMessage = Replace(strMessage, "<Event Date>", Format(.Item("Event_Date"), "dd/MM/yyyy") & "")
 
