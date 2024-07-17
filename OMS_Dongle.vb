@@ -60,7 +60,10 @@ Public Class OMS_Dongle
     Private gintServer_Type As Integer
     Private gstrServer_Name As String
     Private gstrSQL_Server_Instance_Name As String
+    Private gstrLocal_Server_Name As String
+    Private gstrLocal_Instance_Name As String
     Private gstrSQL_Server_Port As String
+    Private gstrOMS_Data_Backup_Path As String
     Private gstrOffline_System_SQL_Server_Instance_Name As String
     Private gstrShared_Folder As String
     Private gstrSQL_Instance_User_Name As String
@@ -298,6 +301,30 @@ Public Class OMS_Dongle
                 gstrSQL_Server_Instance_Name = gstrServer_Name
             Else
                 gstrSQL_Server_Instance_Name = gstrServer_Name & "\" & gstrSQL_Server_Instance_Name
+            End If
+
+            dl = GetPrivateProfileString("AppData", "S7", "", strRetValue, 255, strFile)
+            If dl <> 0 Then
+                gstrOMS_Data_Backup_Path = Decrypt_User_Password(strRetValue.ToString) '.Substring(1, dl)
+            Else
+                gstrOMS_Data_Backup_Path = ""
+            End If
+
+            gstrLocal_Instance_Name = ""
+            gstrLocal_Server_Name = ""
+
+            dl = GetPrivateProfileString("AppData", "L2", "", strRetValue, 255, strFile)
+            If dl <> 0 Then
+                gstrLocal_Server_Name = Left(Decrypt_User_Password(strRetValue.ToString), 15) '.Substring(1, dl)
+            End If
+            dl = GetPrivateProfileString("AppData", "L3", "", strRetValue, 255, strFile)
+            If dl <> 0 Then
+                gstrLocal_Instance_Name = Left(Decrypt_User_Password(strRetValue.ToString), 15) '.Substring(1, dl)
+            End If
+            If Left(gstrLocal_Instance_Name, 15) = gstrLocal_Server_Name And gstrLocal_Server_Name <> "" Then
+                gstrLocal_Instance_Name = gstrLocal_Server_Name
+            ElseIf gstrLocal_Server_Name <> "" Then
+                gstrLocal_Instance_Name = gstrLocal_Server_Name & "\" & gstrLocal_Instance_Name
             End If
 
             ReadINI = True
@@ -1538,8 +1565,8 @@ Public Class OMS_Dongle
         URLencshort = strURLencshort
     End Function
 
-    Private Sub Backup_Schedule()
-        connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
+    Private Sub Backup_Schedule(ByVal strSQL_Server_Instance_Name As String)
+        connetionString = "Data Source=" & strSQL_Server_Instance_Name & ";Initial Catalog=OMSSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
         adoCon_Company = New SqlConnection(connetionString)
         Try
             adoCon_Company.Open()
@@ -1561,7 +1588,7 @@ Public Class OMS_Dongle
             For i = 0 To adoRS_Company.Tables(0).Rows.Count - 1
                 With adoRS_Company.Tables(0).Rows(i)
                     Try
-                        strDataPath = "E:\VB_Prog_Data_Backup\OMS_Soft_Data\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
+                        strDataPath = gstrOMS_Data_Backup_Path & "\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
                         'strDataPath = "D:\Backup\AEL\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
 
                         gintAttachment = 0
@@ -1872,13 +1899,25 @@ Public Class OMS_Dongle
 
     Private Sub Refresh_Server_Data()
         If ReadINI() = True Then
+            If UCase(Environment.MachineName) = UCase(gstrServer_Name) Or UCase(Environment.MachineName) = UCase(gstrLocal_Server_Name) Then
+                If gstrOMS_Data_Backup_Path <> "" Then
+                    If Directory.Exists(gstrOMS_Data_Backup_Path) = False Then
+                        Directory.CreateDirectory(gstrOMS_Data_Backup_Path)
+                    End If
+                    If UCase(Environment.MachineName) = UCase(gstrServer_Name) Then
+                        Backup_Schedule(gstrSQL_Server_Instance_Name)
+                    ElseIf UCase(Environment.MachineName) = UCase(gstrLocal_Server_Name) Then
+                        Backup_Schedule(gstrLocal_Instance_Name)
+                    End If
+                End If
+            End If
+
             If UCase(Environment.MachineName) = UCase(gstrServer_Name) Then
                 'Search_Lock()
                 'If InStr(1, gstrAllowed_Multiple_Companies_LockIds, gstrHasp_LockId) = 0 Then
                 '    Server_Schedule()
                 'ElseIf gstrHasp_LockId = "1917058163" Then
                 'End If
-                Backup_Schedule()
                 OMS_Event_SMS_Send()
                 Restore_RSInfo()
             End If
