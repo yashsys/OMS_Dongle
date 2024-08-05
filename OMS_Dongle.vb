@@ -1445,16 +1445,32 @@ Public Class OMS_Dongle
 
                     lngEvent_Id = Val(.Item("Event_Id"))
 
-                    strMobile_No = .Item("Event_Member_Mobile_No") & ""
-                    If Len(Trim(.Item("SMS1_Mobile_No") & "")) = 10 And InStr(1, strMobile_No, Trim(.Item("SMS1_Mobile_No") & "")) = 0 Then
-                        strMobile_No = strMobile_No & "," & Trim(.Item("SMS1_Mobile_No") & "")
+                    strMobile_No = Trim(.Item("Event_Member_Mobile_No") & "")
+                    If Len(strMobile_No) = 10 Then
+                        strMobile_No = "91" & strMobile_No
                     End If
-                    If Len(Trim(.Item("SMS2_Mobile_No") & "")) = 10 And InStr(1, strMobile_No, Trim(.Item("SMS2_Mobile_No") & "")) = 0 Then
-                        strMobile_No = strMobile_No & "," & Trim(.Item("SMS2_Mobile_No") & "")
+                    If Len(Trim(.Item("SMS1_Mobile_No") & "")) >= 10 Then
+                        If Len(Trim(.Item("SMS1_Mobile_No") & "")) = 10 Then
+                            strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS1_Mobile_No") & "")
+                        Else
+                            strMobile_No = strMobile_No & "," & Trim(.Item("SMS1_Mobile_No") & "")
+                        End If
                     End If
-                    If Len(Trim(.Item("SMS3_Mobile_No") & "")) = 10 And InStr(1, strMobile_No, Trim(.Item("SMS3_Mobile_No") & "")) = 0 Then
-                        strMobile_No = strMobile_No & "," & Trim(.Item("SMS3_Mobile_No") & "")
+                    If Len(Trim(.Item("SMS2_Mobile_No") & "")) >= 10 Then
+                        If Len(Trim(.Item("SMS2_Mobile_No") & "")) = 10 Then
+                            strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS2_Mobile_No") & "")
+                        Else
+                            strMobile_No = strMobile_No & "," & Trim(.Item("SMS2_Mobile_No") & "")
+                        End If
                     End If
+                    If Len(Trim(.Item("SMS3_Mobile_No") & "")) >= 10 Then
+                        If Len(Trim(.Item("SMS3_Mobile_No") & "")) = 10 Then
+                            strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS3_Mobile_No") & "")
+                        Else
+                            strMobile_No = strMobile_No & "," & Trim(.Item("SMS3_Mobile_No") & "")
+                        End If
+                    End If
+
                     If IsDBNull(.Item("Message")) = True Then
                         strMessage = .Item("Event_Message") & ""
                     Else
@@ -1471,12 +1487,17 @@ Public Class OMS_Dongle
 
                     'strMessage = strMessage & " Date : " & Format(.Item("Event_Date"), "dd/MM/yyyy") & ""
                     'MsgBox(Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy"))
-                    If Val(.Item("Send_SMS") & "") = 1 And CDate(Now()) >= CDate(.Item("SMS_From_Date")) And Format(CDate(Now()), "dd/MMM/yyyy") <= Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy") Then
-                        strSQL_String = "BEGIN"
-                        strSQL_String = strSQL_String & vbCrLf & "EXEC master.dbo.sp_configure 'show advanced options', 1"
-                        strSQL_String = strSQL_String & vbCrLf & "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
-                        strSQL_String = strSQL_String & vbCrLf & "END"
+                    If strMessage <> "" And Val(.Item("Send_SMS") & "") = 1 And CDate(Now()) >= CDate(.Item("SMS_From_Date")) And Format(CDate(Now()), "dd/MMM/yyyy") <= Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy") Then
+                        strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
+                        adocommand = New SqlCommand(strSQL_String, adoSMS)
+                        adocommand.CommandTimeout = 0
+                        adocommand.ExecuteNonQuery()
 
+                        adocommand = New SqlCommand("RECONFIGURE", adoSMS)
+                        adocommand.CommandTimeout = 0
+                        adocommand.ExecuteNonQuery()
+
+                        strSQL_String = "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
                         adocommand = New SqlCommand(strSQL_String, adoSMS)
                         adocommand.CommandTimeout = 0
                         adocommand.ExecuteNonQuery()
@@ -1496,15 +1517,15 @@ Public Class OMS_Dongle
                         strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(ww,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(ww,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 2 Then
                         'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(mm,1,Event_Date), SMS_From_Date = DATEADD(mm,1,SMS_From_Date), SMS_Date_Time = DATEADD(mm,1,SMS_Date_Time), Next_SMS_On = DATEADD(mm,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On)  ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 3 Then
                         'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(qq,1,Event_Date), SMS_From_Date = DATEADD(qq,1,SMS_From_Date), SMS_Date_Time = DATEADD(qq,1,SMS_Date_Time), Next_SMS_On = DATEADD(qq,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(qq,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On)  ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(qq,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(qq,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 4 Then
                         'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(mm,6,Event_Date), SMS_From_Date = DATEADD(mm,6,SMS_From_Date), SMS_Date_Time = DATEADD(mm,6,SMS_Date_Time), Next_SMS_On = DATEADD(mm,6,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,6,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On)  ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(mm,6,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(mm,6,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     ElseIf intRepeat_Event_Reminder = 5 Then
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(yyyy,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(yyyy,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(yyyy,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     Else
                         strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Next_SMS_On = NULL, Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
                     End If
