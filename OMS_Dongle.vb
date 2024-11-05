@@ -1409,6 +1409,93 @@ Public Class OMS_Dongle
         End Try
     End Function
 
+    Private Function Whats_Up_Remainder_Send()
+        connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
+
+        Dim adoSMS As New SqlConnection(connetionString)
+        Try
+
+            adoSMS.Open()
+
+            connetionString = ""
+
+            Dim adapter As New SqlDataAdapter
+            Dim adoRs_SMS As New DataSet
+            Dim strMessage As String
+            Dim strMobile_No As String
+            Dim intRepeat_Event_Reminder As Integer
+            Dim strNext_SMS_On As String
+            Dim lngEvent_Id As Long
+            Dim intSMS_Days_After As Integer
+
+            Dim strCompany_Database As String
+            Dim strCentral_Database As String
+
+            'strSQL_String = "SELECT * FROM tblEvent_Mast WHERE (Send_SMS=1 OR CAST(GETDATE() AS DATE)>Event_Date) AND GETDATE() > Next_SMS_On AND (Repeat_Option=0 OR Remainder_End_Date >= CAST(GETDATE() AS DATE))"
+
+            strSQL_String = "SELECT 'OMSSoft-YSIC-'+ Head_Office_Id + '-' + Location_Id + '-' + CAST(Financial_Year AS VARCHAR(10)) AS Company_Database, Central_Database FROM [OMSSoft_Company].[dbo].[tblCompany_Detail]"
+            strSQL_String = strSQL_String & vbCrLf & "WHERE LEN(Financial_Year)=8 AND (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT)) ORDER BY Company_Id"
+
+
+            adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
+            adapter.Fill(adoRs_SMS)
+            adapter.Dispose()
+            For i = 0 To adoRs_SMS.Tables(0).Rows.Count - 1
+                With adoRs_SMS.Tables(0).Rows(i)
+                    Dim adocommand As SqlCommand
+                    Dim strLeave_Application_Ids As String
+
+                    strLeave_Application_Ids = ""
+                    strCompany_Database = Trim(.Item("Company_Database") & "")
+
+                    strCentral_Database = Trim(.Item("Central_Database") & "")
+
+
+                    strMobile_No = "919326264245"
+
+                    strMessage = Send_WhatsUp2(strCentral_Database, strCompany_Database, strLeave_Application_Ids)
+                    'strMessage = "Hello"
+                    If strMessage <> "" And strLeave_Application_Ids <> "" And strLeave_Application_Ids <> "''" Then
+                        strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
+                        adocommand = New SqlCommand(strSQL_String, adoSMS)
+                        adocommand.CommandTimeout = 0
+                        adocommand.ExecuteNonQuery()
+
+                        adocommand = New SqlCommand("RECONFIGURE", adoSMS)
+                        adocommand.CommandTimeout = 0
+                        adocommand.ExecuteNonQuery()
+
+                        strSQL_String = "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
+                        adocommand = New SqlCommand(strSQL_String, adoSMS)
+                        adocommand.CommandTimeout = 0
+                        adocommand.ExecuteNonQuery()
+
+                        adocommand = New SqlCommand("RECONFIGURE", adoSMS)
+                        adocommand.CommandTimeout = 0
+                        adocommand.ExecuteNonQuery()
+
+                        adocommand = New SqlCommand("EXEC [" & strCentral_Database & "].dbo.spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', '1707166280617387783', 0", adoSMS)
+                        adocommand.CommandTimeout = 0
+                        adocommand.ExecuteNonQuery()
+                    End If
+                    If strLeave_Application_Ids <> "" And strLeave_Application_Ids <> "''" Then
+                        strSQL_String = "UPDATE [" & strCompany_Database & "].dbo.tblLeave_Application SET Last_Msg_Send = GETDATE() WHERE Leave_Application_Id IN (" & strLeave_Application_Ids & ")"
+
+                        adocommand = New SqlCommand(strSQL_String, adoSMS)
+                        adocommand.CommandTimeout = 0
+                        adocommand.ExecuteNonQuery()
+                    End If
+                End With
+            Next
+        Catch ex1 As Exception
+            If connetionString = "" Then
+                Print_Error_Only("OMS Event SMS Send", ex1)
+            End If
+        End Try
+        adoSMS.Close()
+        adoSMS.Dispose()
+    End Function
+
     Private Function OMS_Event_SMS_Send()
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Central_YSIPL;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
 
@@ -1921,6 +2008,8 @@ Public Class OMS_Dongle
     Private Sub Refresh_Server_Data()
         If ReadINI() = True Then
             If UCase(Environment.MachineName) = UCase(gstrServer_Name) Or UCase(Environment.MachineName) = UCase(gstrLocal_Server_Name) Then
+                Whats_Up_Remainder_Send()
+
                 If gstrOMS_Data_Backup_Path <> "" Then
                     If Directory.Exists(gstrOMS_Data_Backup_Path) = False Then
                         Directory.CreateDirectory(gstrOMS_Data_Backup_Path)
@@ -1944,6 +2033,52 @@ Public Class OMS_Dongle
             End If
         End If
     End Sub
+
+    Private Function Send_WhatsUp2(ByVal strCentral_Database As String, ByVal strCompany_Database As String, ByRef strLeave_Application_Ids As String) As String
+
+        connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=" & strCentral_Database & ";User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
+
+        Dim adoWhatsUp As New SqlConnection(connetionString)
+        Try
+            adoWhatsUp.Open()
+
+            connetionString = ""
+
+            strLeave_Application_Ids = "''"
+
+            Dim adapter As New SqlDataAdapter
+            Dim adoRs_WhatsUp As New DataSet
+            Dim strWhatsUP_Msg As String
+
+            strWhatsUP_Msg = "Remainder : "
+            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*Approval is pending for following Leave Application"
+            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "Employee Name      -   Leave From Date"
+
+            strSQL_String = "SELECT LAP.Leave_Application_Id, USR.User_Desc, LAP.Leave_From from [" & strCompany_Database & "].dbo.tblLeave_Application LAP"
+            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblUser_Mast USR ON USR.User_Id = LAP.Employee_Id"
+            strSQL_String = strSQL_String & vbCrLf & "WHERE DATEDIFF(DAY,GETDATE(),Leave_From) < 5 AND DATEDIFF(DAY,GETDATE(),Leave_From)>0 AND Leave_Approved = 0 AND (Last_Msg_Send IS NULL OR CAST(Last_Msg_Send AS DATE)<>CAST(GETDATE() AS DATE))"
+
+            adapter.SelectCommand = New SqlCommand(strSQL_String, adoWhatsUp)
+            adapter.Fill(adoRs_WhatsUp)
+            adapter.Dispose()
+            For i = 0 To adoRs_WhatsUp.Tables(0).Rows.Count - 1
+                With adoRs_WhatsUp.Tables(0).Rows(i)
+
+                    strLeave_Application_Ids = strLeave_Application_Ids & ",'" & Trim(.Item("Leave_Application_Id")) & "'"
+
+                    'strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & .Item("User_Desc") & Space(40 - Len(.Item("User_Desc"))) & " - " & .Item("Leave_From")
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & .Item("User_Desc") & " - " & .Item("Leave_From")
+
+                End With
+            Next
+            Send_WhatsUp2 = strWhatsUP_Msg
+        Catch ex1 As Exception
+            Print_Error_Only("Restore_RSInfo", ex1)
+            Send_WhatsUp2 = ""
+            strLeave_Application_Ids = ""
+        End Try
+    End Function
+
 
     Private Function Restore_RSInfo() As Boolean
         '''TS-103 | System should Read Ctrl+F4 information available on FTP Upload folder and update the same in OMS data for that client site.
