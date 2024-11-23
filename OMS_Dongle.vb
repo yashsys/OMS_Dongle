@@ -64,6 +64,7 @@ Public Class OMS_Dongle
     Private gstrLocal_Instance_Name As String
     Private gstrSQL_Server_Port As String
     Private gstrOMS_Data_Backup_Path As String
+    Private gstrBackup_Schedule As String
     Private gstrOffline_System_SQL_Server_Instance_Name As String
     Private gstrShared_Folder As String
     Private gstrSQL_Instance_User_Name As String
@@ -308,6 +309,13 @@ Public Class OMS_Dongle
                 gstrOMS_Data_Backup_Path = Decrypt_User_Password(strRetValue.ToString) '.Substring(1, dl)
             Else
                 gstrOMS_Data_Backup_Path = ""
+            End If
+
+            dl = GetPrivateProfileString("AppData", "S8", "", strRetValue, 255, strFile)
+            If dl <> 0 Then
+                gstrBackup_Schedule = Trim(strRetValue.ToString) '.Substring(1, dl)
+            Else
+                gstrBackup_Schedule = "21:00"
             End If
 
             gstrLocal_Instance_Name = ""
@@ -1818,7 +1826,12 @@ Public Class OMS_Dongle
                             command = New SqlCommand
                             command.Connection = adoCon_Company
                             command.CommandTimeout = 0
-                            command.CommandText = "UPDATE [OMSSoft_Company].DBO.tblCompany_Detail SET Backup_Schedule = 0, Next_Backup = CAST(CONVERT(VARCHAR,GETDATE()+1,23) + ' 21:00:00' AS DATETIME) WHERE Company_Id = '" & gstrCompany_Id & "' AND Financial_Year = '" & glngFinancial_Year & "'"
+                            If gstrBackup_Schedule <> "" Then
+                                command.CommandText = "UPDATE [OMSSoft_Company].DBO.tblCompany_Detail SET Backup_Schedule = 0, Next_Backup = CAST(CONVERT(VARCHAR,GETDATE()+1,23) + ' " & gstrBackup_Schedule & ":00' AS DATETIME) WHERE Company_Id = '" & gstrCompany_Id & "' AND Financial_Year = '" & glngFinancial_Year & "'"
+                            Else
+                                command.CommandText = "UPDATE [OMSSoft_Company].DBO.tblCompany_Detail SET Backup_Schedule = 0, Next_Backup = CAST(CONVERT(VARCHAR,GETDATE()+1,23) + ' 21:00:00' AS DATETIME) WHERE Company_Id = '" & gstrCompany_Id & "' AND Financial_Year = '" & glngFinancial_Year & "'"
+                            End If
+
                             command.ExecuteNonQuery()
                         End If
 
@@ -2028,6 +2041,7 @@ Public Class OMS_Dongle
                 '    Server_Schedule()
                 'ElseIf gstrHasp_LockId = "1917058163" Then
                 'End If
+
                 OMS_Event_SMS_Send()
                 Restore_RSInfo()
             End If
