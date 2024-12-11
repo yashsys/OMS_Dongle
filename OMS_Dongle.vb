@@ -1517,6 +1517,7 @@ Public Class OMS_Dongle
             Dim strMobile_No As String
             Dim intRepeat_Event_Reminder As Integer
             Dim strNext_SMS_On As String
+            Dim strEvent_Days As String
             Dim lngEvent_Id As Long
             Dim intSMS_Days_After As Integer
 
@@ -1539,7 +1540,7 @@ Public Class OMS_Dongle
                     Dim adocommand As SqlCommand
 
                     lngEvent_Id = Val(.Item("Event_Id"))
-
+                    strEvent_Days = Trim(.Item("Event_Days") & "")
                     strMobile_No = Trim(.Item("Event_Member_Mobile_No") & "")
                     If Len(strMobile_No) = 10 Then
                         strMobile_No = "91" & strMobile_No
@@ -1565,7 +1566,7 @@ Public Class OMS_Dongle
                             strMobile_No = strMobile_No & "," & Trim(.Item("SMS3_Mobile_No") & "")
                         End If
                     End If
-
+                    'strMobile_No = "919326264245"
                     If IsDBNull(.Item("Message")) = True Then
                         strMessage = .Item("Event_Message") & ""
                     Else
@@ -1582,7 +1583,10 @@ Public Class OMS_Dongle
 
                     'strMessage = strMessage & " Date : " & Format(.Item("Event_Date"), "dd/MM/yyyy") & ""
                     'MsgBox(Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy"))
-                    If strMessage <> "" And Val(.Item("Send_SMS") & "") = 1 And CDate(Now()) >= CDate(.Item("SMS_From_Date")) And Format(CDate(Now()), "dd/MMM/yyyy") <= Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy") Then
+                    If Mid(strEvent_Days, Weekday(Now(), FirstDayOfWeek.Monday), 1) = "1" And strMessage <> "" And Val(.Item("Send_SMS") & "") = 1 And CDate(Now()) >= CDate(.Item("SMS_From_Date")) And Format(CDate(Now()), "dd/MMM/yyyy") <= Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy") Then
+
+                        Generate_Log("What's up Sending for Event Id :" & lngEvent_Id & vbCrLf & "To Mobile No(s) : " & strMobile_No)
+
                         strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
                         adocommand = New SqlCommand(strSQL_String, adoSMS)
                         adocommand.CommandTimeout = 0
@@ -1639,6 +1643,30 @@ Public Class OMS_Dongle
         adoSMS.Close()
         adoSMS.Dispose()
     End Function
+
+    Private Sub Generate_Log(ByVal strProcedure As String)
+        Try
+            Dim fileLoc As String = My.Application.Info.DirectoryPath & "\OMS_Dongle_Log_" & WeekdayName(Weekday(Now(), vbMonday), False, vbMonday) & ".txt"
+            Dim fs As FileStream = Nothing
+            If File.Exists(fileLoc) Then
+                If FormatDateTime(FileDateTime(fileLoc), DateFormat.ShortDate) <> FormatDateTime(Now(), DateFormat.ShortDate) Then
+                    File.Delete(fileLoc)
+                End If
+            End If
+            If (Not File.Exists(fileLoc)) Then
+                fs = File.Create(fileLoc)
+                fs.Close()
+            End If
+
+            If File.Exists(fileLoc) Then
+                Using sw As StreamWriter = New StreamWriter(fileLoc, True)
+                    sw.WriteLine("Procedure  : " & gstrPublication_Database & "." & strProcedure & vbCrLf & "Start Time : " & Now() & vbCrLf)
+                End Using
+            End If
+        Catch ex As Exception
+            'do nothing
+        End Try
+    End Sub
 
     Private Function Send_SMS_SP(ByVal strMobile_No As String, ByVal strMessage As String)
         Try
@@ -2111,82 +2139,83 @@ Public Class OMS_Dongle
             strCompanies = ""
 
             FTP_Folder_List("59.90.32.112", "FTP_User1", "Timken123#", True, "\Retail_Soft", strCompanies)
+            If strCompanies <> "" Then
+                strSQL_String = "SELECT Site_Id FROM tblClient_Site_Detail WHERE Site_Id IN (" & strCompanies & ") ORDER BY Site_Id"
 
-            strSQL_String = "SELECT Site_Id FROM tblClient_Site_Detail WHERE Site_Id IN (" & strCompanies & ") ORDER BY Site_Id"
+                adapter.SelectCommand = New SqlCommand(strSQL_String, adoRestore)
+                adapter.Fill(adoRs_Restore)
+                adapter.Dispose()
+                For i = 0 To adoRs_Restore.Tables(0).Rows.Count - 1
+                    With adoRs_Restore.Tables(0).Rows(i)
+                        Dim strConsume_Folder As String
+                        Dim strCurrentFile As String
+                        Dim strSetup_Path As String
+                        Dim strSite_Id As String
+                        Dim strHO_Site() As String
+                        Dim intUB As Integer
 
-            adapter.SelectCommand = New SqlCommand(strSQL_String, adoRestore)
-            adapter.Fill(adoRs_Restore)
-            adapter.Dispose()
-            For i = 0 To adoRs_Restore.Tables(0).Rows.Count - 1
-                With adoRs_Restore.Tables(0).Rows(i)
-                    Dim strConsume_Folder As String
-                    Dim strCurrentFile As String
-                    Dim strSetup_Path As String
-                    Dim strSite_Id As String
-                    Dim strHO_Site() As String
-                    Dim intUB As Integer
+                        strSite_Id = .Item("Site_Id")
 
-                    strSite_Id = .Item("Site_Id")
+                        FTP_Folder_List("59.90.32.112", "FTP_User1", "Timken123#", True, "\Retail_Soft\" & strSite_Id, strCompanies)
 
-                    FTP_Folder_List("59.90.32.112", "FTP_User1", "Timken123#", True, "\Retail_Soft\" & strSite_Id, strCompanies)
-
-                    If strCompanies <> "" Then
-                        strHO_Site = Split(Replace(strCompanies, "'", ""), ",")
-                        intUB = UBound(strHO_Site)
-                    End If
+                        If strCompanies <> "" Then
+                            strHO_Site = Split(Replace(strCompanies, "'", ""), ",")
+                            intUB = UBound(strHO_Site)
+                        End If
 
 
-                    strSetup_Path = "\Retail_Soft\" & strSite_Id & "\Upload"
+                        strSetup_Path = "\Retail_Soft\" & strSite_Id & "\Upload"
 HO_Site_Again:
-                    Dirlist = New List(Of String) 'I prefer List() instead of an array
-                    FTP_Folder_Files_List("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path, Dirlist)
-                    If Dirlist.Count > 0 Then
-                        strConsume_Folder = My.Application.Info.DirectoryPath & "\Log_Files"
-                        Create_Folder_Or_Delete_Old_Files(strConsume_Folder)
+                        Dirlist = New List(Of String) 'I prefer List() instead of an array
+                        FTP_Folder_Files_List("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path, Dirlist)
+                        If Dirlist.Count > 0 Then
+                            strConsume_Folder = My.Application.Info.DirectoryPath & "\Log_Files"
+                            Create_Folder_Or_Delete_Old_Files(strConsume_Folder)
 
-                        For intx = 0 To (Dirlist.Count - 1)
-                            strCurrentFile = Dirlist.Item(intx)
-                            strCurrentFile = Mid(strCurrentFile, InStr(strCurrentFile, "/", CompareMethod.Text) + 1, Len(strCurrentFile))
-                            If InStr(UCase(strCurrentFile), UCase("Restore_RSInfo_"), CompareMethod.Text) > 0 And InStr(UCase(strCurrentFile), UCase(".CSV"), CompareMethod.Text) > 0 Then
-                                If File.Exists(strConsume_Folder & "/" & strCurrentFile) Then
-                                    File.Delete(strConsume_Folder & "/" & strCurrentFile)
-                                End If
-                                If Get_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile, strConsume_Folder & "/" & strCurrentFile) = True Then
-                                    If Import_CSV_File(adoRestore, strConsume_Folder & "/" & strCurrentFile, "Restore_RSInfo") = True Then
-                                        If Execute_Multiple_Query(adoRestore, 1) = False Then
-                                            If Execute_Multiple_Query(adoRestore, 2) = False Then
+                            For intx = 0 To (Dirlist.Count - 1)
+                                strCurrentFile = Dirlist.Item(intx)
+                                strCurrentFile = Mid(strCurrentFile, InStr(strCurrentFile, "/", CompareMethod.Text) + 1, Len(strCurrentFile))
+                                If InStr(UCase(strCurrentFile), UCase("Restore_RSInfo_"), CompareMethod.Text) > 0 And InStr(UCase(strCurrentFile), UCase(".CSV"), CompareMethod.Text) > 0 Then
+                                    If File.Exists(strConsume_Folder & "/" & strCurrentFile) Then
+                                        File.Delete(strConsume_Folder & "/" & strCurrentFile)
+                                    End If
+                                    If Get_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile, strConsume_Folder & "/" & strCurrentFile) = True Then
+                                        If Import_CSV_File(adoRestore, strConsume_Folder & "/" & strCurrentFile, "Restore_RSInfo") = True Then
+                                            If Execute_Multiple_Query(adoRestore, 1) = False Then
+                                                If Execute_Multiple_Query(adoRestore, 2) = False Then
+                                                Else
+                                                    Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
+                                                End If
                                             Else
                                                 Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
                                             End If
-                                        Else
-                                            Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
-                                        End If
-                                        'TS-186 | System should NOT update the Client Site Master's Information received from Ctrl+F4 String for D-Mart ASL, AFPL & AEL clients.
-                                        strSQL_String = "BEGIN"
-                                        strSQL_String = strSQL_String & vbCrLf & "SET DATEFORMAT DMY"
-                                        strSQL_String = strSQL_String & vbCrLf & "UPDATE CSD SET CSD.Exe_Date  = RSI.Exe_Date, CSD.Date_of_Opening = (CASE WHEN ISDATE(RSI.Go_Live)=1 THEN RSI.Go_Live ELSE CSD.Date_of_Opening END), From_Period = LEFT(RSI.Info, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 3, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 5, 4), To_Period = SUBSTRING(RSI.Info, 9, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 11, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 13, 4)"
-                                        strSQL_String = strSQL_String & vbCrLf & "FROM tblClient_Site_Detail CSD"
-                                        strSQL_String = strSQL_String & vbCrLf & "INNER JOIN Restore_RSInfo RSI ON RSI.Company_Id = CSD.Site_Id"
-                                        strSQL_String = strSQL_String & vbCrLf & "WHERE CSD.Party_Id IN (SELECT Account_Id FROM tblAccount_Mast WHERE ISNULL(Client_Type,0)=0)"
-                                        strSQL_String = strSQL_String & vbCrLf & "END"
+                                            'TS-186 | System should NOT update the Client Site Master's Information received from Ctrl+F4 String for D-Mart ASL, AFPL & AEL clients.
+                                            strSQL_String = "BEGIN"
+                                            strSQL_String = strSQL_String & vbCrLf & "SET DATEFORMAT DMY"
+                                            strSQL_String = strSQL_String & vbCrLf & "UPDATE CSD SET CSD.Exe_Date  = RSI.Exe_Date, CSD.Date_of_Opening = (CASE WHEN ISDATE(RSI.Go_Live)=1 THEN RSI.Go_Live ELSE CSD.Date_of_Opening END), From_Period = LEFT(RSI.Info, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 3, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 5, 4), To_Period = SUBSTRING(RSI.Info, 9, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 11, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 13, 4)"
+                                            strSQL_String = strSQL_String & vbCrLf & "FROM tblClient_Site_Detail CSD"
+                                            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN Restore_RSInfo RSI ON RSI.Company_Id = CSD.Site_Id"
+                                            strSQL_String = strSQL_String & vbCrLf & "WHERE CSD.Party_Id IN (SELECT Account_Id FROM tblAccount_Mast WHERE ISNULL(Client_Type,0)=0)"
+                                            strSQL_String = strSQL_String & vbCrLf & "END"
 
-                                        command = New SqlCommand(strSQL_String, adoRestore)
-                                        command.CommandTimeout = 0
-                                        command.ExecuteNonQuery()
+                                            command = New SqlCommand(strSQL_String, adoRestore)
+                                            command.CommandTimeout = 0
+                                            command.ExecuteNonQuery()
+                                        End If
                                     End If
+                                Else
+                                    Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
                                 End If
-                            Else
-                                Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
-                            End If
-                        Next
-                    End If
-                    If strCompanies <> "" And intUB >= 0 Then
-                        strSetup_Path = "\Retail_Soft\" & strSite_Id & "\" & strHO_Site(intUB).ToString() & "\Upload"
-                        intUB = intUB - 1
-                        GoTo HO_Site_Again
-                    End If
-                End With
-            Next
+                            Next
+                        End If
+                        If strCompanies <> "" And intUB >= 0 Then
+                            strSetup_Path = "\Retail_Soft\" & strSite_Id & "\" & strHO_Site(intUB).ToString() & "\Upload"
+                            intUB = intUB - 1
+                            GoTo HO_Site_Again
+                        End If
+                    End With
+                Next
+            End If
         Catch ex1 As Exception
             Print_Error_Only("Restore_RSInfo", ex1)
         End Try
