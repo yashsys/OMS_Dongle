@@ -1441,7 +1441,7 @@ Public Class OMS_Dongle
 
             'strSQL_String = "SELECT * FROM tblEvent_Mast WHERE (Send_SMS=1 OR CAST(GETDATE() AS DATE)>Event_Date) AND GETDATE() > Next_SMS_On AND (Repeat_Option=0 OR Remainder_End_Date >= CAST(GETDATE() AS DATE))"
 
-            strSQL_String = "SELECT 'OMSSoft-YSIC-'+ Head_Office_Id + '-' + Location_Id + '-' + CAST(Financial_Year AS VARCHAR(10)) AS Company_Database, Central_Database FROM [OMSSoft_Company].[dbo].[tblCompany_Detail]"
+            strSQL_String = "SELECT 'OMSSoft-' + Company_Id + '-'+ Head_Office_Id + '-' + Location_Id + '-' + CAST(Financial_Year AS VARCHAR(10)) AS Company_Database, Central_Database FROM [OMSSoft_Company].[dbo].[tblCompany_Detail]"
             strSQL_String = strSQL_String & vbCrLf & "WHERE LEN(Financial_Year)=8 AND (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT)) ORDER BY Company_Id"
 
 
