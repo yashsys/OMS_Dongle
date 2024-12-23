@@ -1460,7 +1460,7 @@ Public Class OMS_Dongle
 
 
                     strMobile_No = "919922964296"
-
+                    '''strMobile_No = "919326264245"
                     strMessage = Send_WhatsUp2(strCentral_Database, strCompany_Database, strLeave_Application_Ids)
                     'strMessage = "Hello"
                     If strMessage <> "" And strLeave_Application_Ids <> "" And strLeave_Application_Ids <> "''" Then
@@ -2093,8 +2093,8 @@ Public Class OMS_Dongle
             Dim strWhatsUP_Msg As String
 
             strWhatsUP_Msg = "Remainder : "
-            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*Approval is pending for following Leave Application"
-            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "Employee Name      -   Leave From Date"
+            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*Approval is pending for following Leave Application*"
+            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Employee Name :"
 
             strSQL_String = "SELECT LAP.Leave_Application_Id, USR.User_Desc, LAP.Leave_From from [" & strCompany_Database & "].dbo.tblLeave_Application LAP"
             strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblUser_Mast USR ON USR.User_Id = LAP.Employee_Id"
@@ -2109,8 +2109,9 @@ Public Class OMS_Dongle
                     strLeave_Application_Ids = strLeave_Application_Ids & ",'" & Trim(.Item("Leave_Application_Id")) & "'"
 
                     'strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & .Item("User_Desc") & Space(40 - Len(.Item("User_Desc"))) & " - " & .Item("Leave_From")
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & .Item("User_Desc") & " - " & .Item("Leave_From")
-
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & Trim(.Item("User_Desc")) & "*"
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Leave From Date"
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & .Item("Leave_From") & "*"
                 End With
             Next
             Send_WhatsUp2 = strWhatsUP_Msg
