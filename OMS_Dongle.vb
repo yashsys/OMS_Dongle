@@ -1531,7 +1531,7 @@ Public Class OMS_Dongle
             strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM2 ON MEM2.Member_Id = EVN.SMS2_Member_Id"
             strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM3 ON MEM3.Member_Id = EVN.SMS3_Member_Id"
             strSQL_String = strSQL_String & vbCrLf & "WHERE (EVN.Send_SMS=1 OR CAST(GETDATE() AS DATE)>EVN.Event_Date) AND GETDATE() > EVN.Next_SMS_On AND (EVN.Repeat_Option=0 OR EVN.Remainder_End_Date >= CAST(GETDATE() AS DATE))"
-
+            '
             adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
             adapter.Fill(adoRs_SMS)
             adapter.Dispose()
@@ -1583,7 +1583,7 @@ Public Class OMS_Dongle
 
                     'strMessage = strMessage & " Date : " & Format(.Item("Event_Date"), "dd/MM/yyyy") & ""
                     'MsgBox(Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy"))
-                    If Mid(strEvent_Days, Weekday(Now(), FirstDayOfWeek.Monday), 1) = "1" And strMessage <> "" And Val(.Item("Send_SMS") & "") = 1 And CDate(Now()) >= CDate(.Item("SMS_From_Date")) And Format(CDate(Now()), "dd/MMM/yyyy") <= Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy") Then
+                    If Mid(strEvent_Days, Weekday(Now(), FirstDayOfWeek.Monday), 1) = "1" And Val(.Item("Send_SMS") & "") = 1 And strMessage <> "" And CDate(Now()) >= CDate(.Item("SMS_From_Date")) And CDate(Now()) <= CDate(.Item("SMS_Date_Time")) Then
 
                         Generate_Log("What's up Sending for Event Id :" & lngEvent_Id & vbCrLf & "To Mobile No(s) : " & strMobile_No)
 

@@ -63,17 +63,17 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>ntuN6IuJ+ER4J7fcI4YJLLlQpAk=</dsig:DigestValue>
+        <dsig:DigestValue>/oMZ/5KywSZYnuCZIvVr13CCDGg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
-  <file name="OMS_Dongle.exe.config" size="1336">
+  <file name="OMS_Dongle.exe.config" size="1338">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-      <dsig:DigestValue>sD1suQfBOUkse5FBR6SYsx74Of0=</dsig:DigestValue>
+      <dsig:DigestValue>NNWs7QjvdSnzeKNYs3SDuEDQCiQ=</dsig:DigestValue>
     </hash>
   </file>
 </asmv1:assembly>
