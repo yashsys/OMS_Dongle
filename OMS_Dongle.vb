@@ -1444,7 +1444,6 @@ Public Class OMS_Dongle
             strSQL_String = "SELECT 'OMSSoft-' + Company_Id + '-'+ Head_Office_Id + '-' + Location_Id + '-' + CAST(Financial_Year AS VARCHAR(10)) AS Company_Database, Central_Database FROM [OMSSoft_Company].[dbo].[tblCompany_Detail]"
             strSQL_String = strSQL_String & vbCrLf & "WHERE LEN(Financial_Year)=8 AND (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT)) ORDER BY Company_Id"
 
-
             adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
             adapter.Fill(adoRs_SMS)
             adapter.Dispose()
@@ -1458,13 +1457,15 @@ Public Class OMS_Dongle
 
                     strCentral_Database = Trim(.Item("Central_Database") & "")
 
-
                     strMobile_No = "919922964296"
-                    '''strMobile_No = "919326264245"
+
+                    'strMobile_No = "917588407565"
                     strMessage = Send_WhatsUp2(strCentral_Database, strCompany_Database, strLeave_Application_Ids)
                     'strMessage = "Hello"
                     If strMessage <> "" And strLeave_Application_Ids <> "" And strLeave_Application_Ids <> "''" Then
+
                         strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
+
                         adocommand = New SqlCommand(strSQL_String, adoSMS)
                         adocommand.CommandTimeout = 0
                         adocommand.ExecuteNonQuery()
@@ -1582,8 +1583,9 @@ Public Class OMS_Dongle
                     strNext_SMS_On = .Item("Next_SMS_On") & ""
 
                     'strMessage = strMessage & " Date : " & Format(.Item("Event_Date"), "dd/MM/yyyy") & ""
-                    'MsgBox(Format(CDate(.Item("SMS_Date_Time")), "dd/MMM/yyyy"))
-                    If Mid(strEvent_Days, Weekday(Now(), FirstDayOfWeek.Monday), 1) = "1" And Val(.Item("Send_SMS") & "") = 1 And strMessage <> "" And CDate(Now()) >= CDate(.Item("SMS_From_Date")) And CDate(Now()) <= CDate(.Item("SMS_Date_Time")) Then
+                    MsgBox(FormatDateTime(.Item("SMS_From_Date"), DateFormat.ShortDate))
+
+                    If Mid(strEvent_Days, Weekday(Now(), FirstDayOfWeek.Monday), 1) = "1" And Val(.Item("Send_SMS") & "") = 1 And strMessage <> "" And FormatDateTime(Now(), DateFormat.ShortDate) >= FormatDateTime(.Item("SMS_From_Date"), DateFormat.ShortDate) And FormatDateTime(Now(), DateFormat.ShortDate) <= FormatDateTime(.Item("SMS_Date_Time"), DateFormat.ShortDate) Then
 
                         Generate_Log("What's up Sending for Event Id :" & lngEvent_Id & vbCrLf & "To Mobile No(s) : " & strMobile_No)
 
@@ -2092,13 +2094,14 @@ Public Class OMS_Dongle
             Dim adoRs_WhatsUp As New DataSet
             Dim strWhatsUP_Msg As String
 
+
             strWhatsUP_Msg = "Remainder : "
             strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*Approval is pending for following Leave Application*"
             strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Employee Name :"
 
-            strSQL_String = "SELECT LAP.Leave_Application_Id, USR.User_Desc, LAP.Leave_From from [" & strCompany_Database & "].dbo.tblLeave_Application LAP"
-            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblUser_Mast USR ON USR.User_Id = LAP.Employee_Id"
-            strSQL_String = strSQL_String & vbCrLf & "WHERE DATEDIFF(DAY,GETDATE(),Leave_From) < 5 AND DATEDIFF(DAY,GETDATE(),Leave_From)>0 AND Leave_Approved = 0 AND (Last_Msg_Send IS NULL OR CAST(Last_Msg_Send AS DATE)<>CAST(GETDATE() AS DATE))"
+            strSQL_String = "SELECT LAP.Leave_Application_Id, USR.User_Desc, LAP.Leave_From, LAP.Leave_To, LAP.Leave_Reason from [" & strCompany_Database & "].dbo.tblLeave_Application LAP"
+            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblUser_Mast USR ON USR.User_Id = LAP.Employee_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE DATEDIFF(DAY,GETDATE(),Leave_From) < 5 AND DATEDIFF(DAY,GETDATE(),Leave_From)>0 AND Leave_Approved = 0 AND ((Last_Msg_Send IS NULL OR CAST(Last_Msg_Send AS DATE)<>CAST(GETDATE() AS DATE)) AND CONVERT(varchar,getdate(),14) > '11:00:00')"
 
             adapter.SelectCommand = New SqlCommand(strSQL_String, adoWhatsUp)
             adapter.Fill(adoRs_WhatsUp)
@@ -2109,9 +2112,20 @@ Public Class OMS_Dongle
                     strLeave_Application_Ids = strLeave_Application_Ids & ",'" & Trim(.Item("Leave_Application_Id")) & "'"
 
                     'strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & .Item("User_Desc") & Space(40 - Len(.Item("User_Desc"))) & " - " & .Item("Leave_From")
+
                     strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & Trim(.Item("User_Desc")) & "*"
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Leave From Date"
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & .Item("Leave_From") & "*"
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Leave Period"
+
+                    If DateDiff(DateInterval.Day, CDate(.Item("Leave_From")), CDate(.Item("Leave_To")), FirstDayOfWeek.Monday) >= 1 Then
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & .Item("Leave_From") & " - " & .Item("Leave_To") & " ( " & DateDiff(DateInterval.Day, CDate(.Item("Leave_From")), CDate(.Item("Leave_To")), FirstDayOfWeek.Monday) + 1 & " Days )*"
+                    Else
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & .Item("Leave_From") & " - " & .Item("Leave_To") & " ( " & 1 & " Day )*"
+                    End If
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Reason :"
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & Trim(.Item("Leave_Reason")) & "*"
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Sent From IP Address :"
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & gstrServer_IP_Address & "*"
+
                 End With
             Next
             Send_WhatsUp2 = strWhatsUP_Msg
