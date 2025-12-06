@@ -1583,8 +1583,7 @@ Public Class OMS_Dongle
                     strNext_SMS_On = .Item("Next_SMS_On") & ""
 
                     'strMessage = strMessage & " Date : " & Format(.Item("Event_Date"), "dd/MM/yyyy") & ""
-                    MsgBox(FormatDateTime(.Item("SMS_From_Date"), DateFormat.ShortDate))
-
+                    'MsgBox(FormatDateTime(.Item("SMS_From_Date"), DateFormat.ShortDate))
                     If Mid(strEvent_Days, Weekday(Now(), FirstDayOfWeek.Monday), 1) = "1" And Val(.Item("Send_SMS") & "") = 1 And strMessage <> "" And FormatDateTime(Now(), DateFormat.ShortDate) >= FormatDateTime(.Item("SMS_From_Date"), DateFormat.ShortDate) And FormatDateTime(Now(), DateFormat.ShortDate) <= FormatDateTime(.Item("SMS_Date_Time"), DateFormat.ShortDate) Then
 
                         Generate_Log("What's up Sending for Event Id :" & lngEvent_Id & vbCrLf & "To Mobile No(s) : " & strMobile_No)
