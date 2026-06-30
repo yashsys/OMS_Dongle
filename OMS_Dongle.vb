@@ -1418,6 +1418,82 @@ Public Class OMS_Dongle
         End Try
     End Function
 
+    Private Function Asset_Service_Whats_Up()
+        connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Central_YSIPL;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
+
+        Dim adoSMS As New SqlConnection(connetionString)
+        Try
+
+            adoSMS.Open()
+
+            connetionString = ""
+
+            Dim adapter As New SqlDataAdapter
+            Dim adoRs_SMS As New DataSet
+            Dim strMobile_No As String
+
+            strSQL_String = "SELECT * FROM tblAsset_Register_Mast WHERE Send_SMS=1 AND CAST(GETDATE() AS TIME) >= '11:30:00' AND (GETDATE() > CAST(Next_SMS_On AS DATE) OR Next_SMS_On IS NULL) AND CAST(GETDATE() AS DATE) > DATEADD(DAY,-8,Service_Due_Date) AND CAST(GETDATE() AS DATE) < Service_Due_Date"
+
+            adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
+            adapter.Fill(adoRs_SMS)
+            adapter.Dispose()
+            For i = 0 To adoRs_SMS.Tables(0).Rows.Count - 1
+                With adoRs_SMS.Tables(0).Rows(i)
+                    Dim adocommand As SqlCommand
+                    Dim strWhatsUP_Msg As String
+                    Dim intAsset_Id As Integer
+
+                    strWhatsUP_Msg = "Remainder : "
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*Service is pending for following Asset*"
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "      Asset Name : " & Trim(.Item("Asset_Name") & "")
+                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Service Due Date : " & Format(.Item("Service_Due_Date"), "dd/MM/yyyy")
+
+                    intAsset_Id = Val(.Item("Asset_Id") & "")
+
+                    strMobile_No = "919324245252,919922964296"
+
+
+                    strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
+
+                    adocommand = New SqlCommand(strSQL_String, adoSMS)
+                    adocommand.CommandTimeout = 0
+                    adocommand.ExecuteNonQuery()
+
+                    adocommand = New SqlCommand("RECONFIGURE", adoSMS)
+                    adocommand.CommandTimeout = 0
+                    adocommand.ExecuteNonQuery()
+
+                    strSQL_String = "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
+                    adocommand = New SqlCommand(strSQL_String, adoSMS)
+                    adocommand.CommandTimeout = 0
+                    adocommand.ExecuteNonQuery()
+
+                    adocommand = New SqlCommand("RECONFIGURE", adoSMS)
+                    adocommand.CommandTimeout = 0
+                    adocommand.ExecuteNonQuery()
+
+                    'adocommand = New SqlCommand("EXEC [" & strCentral_Database & "].dbo.spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', '1707166280617387783', 0", adoSMS)
+                    adocommand = New SqlCommand("EXEC spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strWhatsUP_Msg), "'", "''")) & "', 0", adoSMS)
+                    adocommand.CommandTimeout = 0
+                    adocommand.ExecuteNonQuery()
+
+                    strSQL_String = "UPDATE tblAsset_Register_Mast SET Next_SMS_On = GETDATE()+1 WHERE Asset_Id = " & intAsset_Id
+
+                    adocommand = New SqlCommand(strSQL_String, adoSMS)
+                    adocommand.CommandTimeout = 0
+                    adocommand.ExecuteNonQuery()
+
+                End With
+            Next
+        Catch ex1 As Exception
+            If connetionString = "" Then
+                Print_Error_Only("Asset Service Whats Up", ex1)
+            End If
+        End Try
+        adoSMS.Close()
+        adoSMS.Dispose()
+    End Function
+
     Private Function Whats_Up_Remainder_Send()
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
 
@@ -2060,7 +2136,9 @@ Public Class OMS_Dongle
             If UCase(Environment.MachineName) = UCase(gstrServer_Name) Or UCase(Environment.MachineName) = UCase(gstrLocal_Server_Name) Then
                 If strGetLocalIPv4 = "192.168.100.249" Then
                     Whats_Up_Remainder_Send()
+                    Asset_Service_Whats_Up()
                 End If
+
                 If gstrOMS_Data_Backup_Path <> "" Then
                     If Directory.Exists(gstrOMS_Data_Backup_Path) = False Then
                         Directory.CreateDirectory(gstrOMS_Data_Backup_Path)
@@ -2194,7 +2272,7 @@ Public Class OMS_Dongle
                         'Create_RS_Inbound_Client_Log("Invoice Setup Change", "", 0)
                         'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
                         'System.Net.ServicePointManager.SecurityProtocol = CType(3072, SecurityProtocolType)
-                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+                        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
                         Dim SmtpServer As New SmtpClient()
                         Dim mail As New MailMessage()
                         SmtpServer.UseDefaultCredentials = False
