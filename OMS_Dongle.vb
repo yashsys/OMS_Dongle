@@ -1542,7 +1542,6 @@ Public Class OMS_Dongle
 
                 'strSQL_String = "SELECT * FROM tblEvent_Mast WHERE (Send_SMS=1 OR CAST(GETDATE() AS DATE)>Event_Date) AND GETDATE() > Next_SMS_On AND (Repeat_Option=0 OR Remainder_End_Date >= CAST(GETDATE() AS DATE))"
 
-
                 strSQL_String = "Select EVN.*, GO_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=CAST(SMS_From_Date AS DATE) AND CAST(GETDATE() AS DATE)<=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE 0 END), EHM.Event_Head_Desc, MSM.Message_Desc, MSM.Message, MEM.Mobile_No AS Event_Member_Mobile_No, MEM1.Mobile_No AS SMS1_Mobile_No, MEM2.Mobile_No AS SMS2_Mobile_No, MEM3.Mobile_No AS SMS3_Mobile_No FROM tblEvent_Mast EVN"
                 strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblEvent_Head_Mast EHM ON EHM.Event_Head_Id = EVN.Event_Head_Id"
                 strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMessage_Mast MSM ON MSM.Message_Id = EVN.Message_Id"
@@ -1550,8 +1549,9 @@ Public Class OMS_Dongle
                 strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM1 ON MEM1.Member_Id = EVN.SMS1_Member_Id"
                 strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM2 ON MEM2.Member_Id = EVN.SMS2_Member_Id"
                 strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM3 ON MEM3.Member_Id = EVN.SMS3_Member_Id"
-                strSQL_String = strSQL_String & vbCrLf & "WHERE (EVN.Send_SMS=1 OR CAST(GETDATE() AS DATE)>EVN.Event_Date) AND GETDATE() > EVN.Next_SMS_On AND (EVN.Repeat_Option=0 OR EVN.Remainder_End_Date >= CAST(GETDATE() AS DATE))"
-                strSQL_String = strSQL_String & vbCrLf & "AND CAST(GETDATE() AS TIME)>=CAST(SMS_From_Date AS TIME)"
+                strSQL_String = strSQL_String & vbCrLf & "WHERE EVN.Event_Id IN (97,98)"
+                'strSQL_String = strSQL_String & vbCrLf & "WHERE (EVN.Send_SMS=1 OR CAST(GETDATE() AS DATE)>EVN.Event_Date) AND GETDATE() > EVN.Next_SMS_On AND (EVN.Repeat_Option=0 OR EVN.Remainder_End_Date >= CAST(GETDATE() AS DATE))"
+                'strSQL_String = strSQL_String & vbCrLf & "AND CAST(GETDATE() AS TIME)>=CAST(SMS_From_Date AS TIME)"
 
                 Using adapter As New SqlDataAdapter
                     adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
@@ -1596,6 +1596,64 @@ Public Class OMS_Dongle
                         strMessage = Replace(strMessage, "<Event Head>", .Item("Event_Head_Desc") & "")
                         strMessage = Replace(strMessage, "<Event Date>", Format(.Item("Event_Date"), "dd/MM/yyyy") & "")
 
+                        strMessage = Replace(strMessage, "<MMM>", MonthName(Month(Date.Today.ToString()), True) & "")
+                        strMessage = Replace(strMessage, "<PMMM>", MonthName(Month(Date.Today.ToString()) - 1, True) & "")
+                        strMessage = Replace(strMessage, "<DD>", Right("0" & Day(Date.Today.ToString()), 2) & "")
+                        strMessage = Replace(strMessage, "<MM>", Right("0" & Month(Date.Today.ToString()), 2) & "")
+                        strMessage = Replace(strMessage, "<PMM>", Right("0" & (Month(Date.Today.ToString()) - 1), 2) & "")
+                        strMessage = Replace(strMessage, "<YY>", Right(Year(Date.Today.ToString()), 2) & "")
+                        strMessage = Replace(strMessage, "<YYYY>", Year(Date.Today.ToString()) & "")
+                        strMessage = Replace(strMessage, "<CFY>", Left(glngFinancial_Year, 4) & "-" & Right(glngFinancial_Year, 2) & "")
+                        strMessage = Replace(strMessage, "<PFY>", Left(glngFinancial_Year - 1, 4) & "-" & Right(Left(glngFinancial_Year, 4), 2) & "")
+                        If InStr(strMessage, "<YSI TDS 1002>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSI TDS 1002>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSIPL TDS 1002>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSIPL TDS 1002>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSI TDS 1027>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSI TDS 1027>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSIPL TDS 1027>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSIPL TDS 1027>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSI TDS 1009>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSI TDS 1009>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSIPL TDS 1009>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSIPL TDS 1009>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSI TDS 1023>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSI TDS 1023>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSIPL TDS 1023>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSIPL TDS 1023>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSIPL IGST>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSIPL IGST>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSIPL CGST>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSIPL CGST>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSIPL SGST>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSIPL SGST>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSIPL NET GST>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSIPL NET GST>", Year(Date.Today.ToString()) & "")
+                        End If
+
+                        If InStr(strMessage, "<YSI IGST>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSI IGST>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSI CGST>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSI CGST>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSI SGST>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSI SGST>", Year(Date.Today.ToString()) & "")
+                        End If
+                        If InStr(strMessage, "<YSI NET GST>", CompareMethod.Text) > 0 Then
+                            strMessage = Replace(strMessage, "<YSI NET GST>", Year(Date.Today.ToString()) & "")
+                        End If
                         intRepeat_Event_Reminder = Val(.Item("Repeat_Event_Reminder") & "")
                         intSMS_Days_After = Val(.Item("SMS_Days_After") & "")
 
@@ -1670,6 +1728,58 @@ Public Class OMS_Dongle
             End Try
             adoRs_SMS.Dispose()
         End Using
+    End Function
+
+    Private Function Retrive_Tag_Detail(ByVal strTAG As String) As String
+        If strTAG = "<YSI TDS 1002>" Then
+            strMessage = Replace(strMessage, "<YSI TDS 1002>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSIPL TDS 1002>" Then
+            strMessage = Replace(strMessage, "<YSIPL TDS 1002>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSI TDS 1027>" Then
+            strMessage = Replace(strMessage, "<YSI TDS 1027>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSIPL TDS 1027>" Then
+            strMessage = Replace(strMessage, "<YSIPL TDS 1027>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSI TDS 1009>" Then
+            strMessage = Replace(strMessage, "<YSI TDS 1009>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSIPL TDS 1009>" Then
+            strMessage = Replace(strMessage, "<YSIPL TDS 1009>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSI TDS 1023>" Then
+            strMessage = Replace(strMessage, "<YSI TDS 1023>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSIPL TDS 1023>" Then
+            strMessage = Replace(strMessage, "<YSIPL TDS 1023>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSIPL IGST>" Then
+            strMessage = Replace(strMessage, "<YSIPL IGST>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSIPL CGST>" Then
+            strMessage = Replace(strMessage, "<YSIPL CGST>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSIPL SGST>" Then
+            strMessage = Replace(strMessage, "<YSIPL SGST>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSIPL NET GST>" Then
+            strMessage = Replace(strMessage, "<YSIPL NET GST>", Year(Date.Today.ToString()) & "")
+        End If
+
+        If strTAG = "<YSI IGST>" Then
+            strMessage = Replace(strMessage, "<YSI IGST>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSI CGST>" Then
+            strMessage = Replace(strMessage, "<YSI CGST>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSI SGST>" Then
+            strMessage = Replace(strMessage, "<YSI SGST>", Year(Date.Today.ToString()) & "")
+        End If
+        If strTAG = "<YSI NET GST>" Then
+            strMessage = Replace(strMessage, "<YSI NET GST>", Year(Date.Today.ToString()) & "")
+        End If
     End Function
 
     Private Sub Generate_Log(ByVal strProcedure As String)
