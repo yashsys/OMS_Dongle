@@ -51,14 +51,7 @@ Public Class OMS_Dongle
     Private Declare Auto Function GetPrivateProfileString Lib "kernel32" (ByVal lpAppName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As StringBuilder, ByVal nSize As Integer, ByVal lpFileName As String) As Integer
     Private strHO_Company_Code As String, strHO_Desc As String, strBranch_Desc As String, strOpening_Date As String, strExe_Version As String
     Private strGetLocalIPv4 As String
-    Private gintCompany_Type As Integer
-    Private gintSAP_Hourly As Integer
-    Private gintProcess_SAP_Inbound_After_Dayend As Integer
-
-    Private gstrHourly_Inbound_File As String
-    Private gstrShift_Counter_Department_User As String
     Private gstrServer_IP_Address As String
-    Private gintServer_Type As Integer
     Private gstrServer_Name As String
     Private gstrSQL_Server_Instance_Name As String
     Private gstrLocal_Server_Name As String
@@ -66,71 +59,19 @@ Public Class OMS_Dongle
     Private gstrSQL_Server_Port As String
     Private gstrOMS_Data_Backup_Path As String
     Private gstrBackup_Schedule As String
-    Private gstrOffline_System_SQL_Server_Instance_Name As String
-    Private gstrShared_Folder As String
     Private gstrSQL_Instance_User_Name As String
     Private gstrPublication_Database As String
     Friend WithEvents Timer1 As System.Timers.Timer
-    Private blnBOD As Boolean
-    Private strBOD_Date As String
     Private Dirlist As List(Of String)
-    Private blnRecursive As Boolean
-    Private blnFirst_Col As Boolean
-    Private strSQL_String As String, strBackup_File As String, strField_Name As String
-    Private strLinked_Server As String
-    Private strTable As String
-    Private intFTP_Disable_PM As Integer
-    Private adoSAP As SqlConnection
-
-    Private adapter As SqlDataAdapter
-    Private adoCon_Client As SqlConnection
-    Private adoCon_Company As SqlConnection
-
-    Private blnFirst_File As Boolean
-    Private command As SqlCommand
+    Private strSQL_String As String, strBackup_File As String
     Private gintAttachment As Integer
-    Private adoRS As DataSet
-    Private adoRs_Table As DataSet
-    Private trans_Server As SqlTransaction
-    Private trans_Client As SqlTransaction
     Private connetionString As String
-    Private intcounter As Integer
-    Private gstrGSB_Department As String
-    Private gstrSMTP_Report As String, gstrMobile_Message As String
-    Private strFTP_Files() As String
-    Private strFTP_Address As String, strFTP_User_Name As String, strFTP_User_Password As String, strSecondary_FTP_Path As String
-    Private strSMTP_Host As String, strSMTP_Port As String, strSMTP_User_Name As String, strSMTP_User_Password As String, strSMTP_Subject As String, strSMTP_To_Addresses As String, strFile_Name As String
-    Private strSMTP_CC_Addresses As String, strSMTP_BCC_Address As String, strSMSDeveloperAPI As String, strSMS_User_Name As String, strSMS_User_Password As String, strSMSMobileNo1 As String, strSMSMobileNo2 As String, strSMSMobileNo3 As String, strSMSMobileNo4 As String, strSMSMobileNo5 As String, strSMSMobileNo6 As String, strSMSMobileNo7 As String, strSMSMobileNo8 As String, strSMSMobileNo9 As String, strSMSMobileNo10 As String, strUpload_After_Every As String
-    Private strLocal_Stock_File_Path As String
-    Private intEvent_Full_Backup As Integer, intEvent_Diff_Backup As Integer, intEvent_Log_Backup As Integer, intBackup_Info_Through As Integer, intEvent_DayEnd As Integer, intDayEnd_Info_Through As Integer, intEvent_SAP_Inbound As Integer, intEvent_SAP_Outbound As Integer, intSend_Birthday_Wishes As Integer, intBirthday_Info_Through As Integer, intSend_Invoice_Info As Integer, intInvoice_Info_Through As Integer, intReIndex_Database As Integer, intAEL As Integer, intUpload_Negative_Stock As Integer, intUpload_Branch As Integer, intSend_ALL_Emails_within As Integer
-
-    Private strHO_IP_Address As String, strHO_Server_Name As String, strHO_SQL_Server_Instance_Name As String, strDT_Company_Id As String, strDT_HO_Location_Id As String, strDT_HO_Database As String, strDTB_FTP_User_Password As String, strDT_Start_Time As String, strDT_Master As String, strDT_Transaction As String
-    Private dtDT_Schedule_Date As Date, dtDT_Schedule_Start_Date As Date, dtDT_Time_LED As Date
-    Private intDT_Schedule_Type As Integer, intHO_SQL_Port As Integer, intDT_After_Dayend As Integer
-    Private strSAP_Indicator As String, strTax_Header As String, dtGST_DATE As String, strDT_FTP_Folder_Path As String
-    Private strFile_Header_Name_Of_Table_Structure As String, strFile_Header_Direction As String, strFile_Header_Name_Of_Basic_Type As String, strFile_Header_Message_Type As String, strFile_Header_Sender_Port As String, strFile_Header_Partner_Type_Of_Sender As String, strFile_Header_Logical_Address_Of_Sender As String, strFile_Header_Receiver_Port As String, strFile_Header_Partner_Type_Of_Receiver As String, strBill_Header_Name_Of_Table_Structure As String, strBill_Header_Currency_Code As String, strItem_Record_Name_Of_Item_Row_Structure As String, strItem_Record_Transaction_Type_In_POS_System As String, strItem_Record_Qualifier_For_Following_Fields As String, strItem_Record_Name_Of_MRP_Row_Structure As String, strItem_Record_Type_Of_Condition_Discount As String, strItem_Record_Name_Of_Rate_Difference_Row_Structure As String, strItem_Record_Discount_At_POS_Level As String, strName_Of_VAT_Row_Structure As String, strGS_TABNAM As String, strName_Of_Addon_Row_Structure As String, strPayment_Row_Credit_Sale As String, strPayment_Row_Name_Of_Table_Structure As String, strAddon_Row_Type_Of_Discout_For_Roff As String, strAddon_Row_Type_Of_Disc_For_Other_Addon As String
-    Private gstrCompany_Id As String, gstrCompany_Name As String, gstrCompany_Address As String, glngFinancial_Year As Long, strSite_Id As String, strClient_Id As String, strLogical_Address_Of_Sender As String, strReceiver_Port As String, strExport_Item_With_Prefix As String, strLocation_ID As String, strHead_Office_Id As String, strFrom_Time As String, strTo_Time As String, strInbound_File_Path As String, strInBound_Format As String, strInBound_Directory As String, intSchedule_Type As Integer, dtInBound_Schedule_Date As Date, dtInBound_Schedule_Start_Date As Date, strBillwise_Time As String, strSummary_Time As String, strCSV_Format_Time As String, strCSV_Summary_Time As String, blnSchedule_Time As Boolean, intInbound_Output_Format As Integer, strFile_Header_Partner_Number_Of_Receiver As String, strFTP_Out_Bound_Folder As String, dtBillwise_Time_LED As Date, dtSummary_Time_LED As Date, dtCSV_Format_Time_LED As Date, dtCSV_Summary_Time_LED As Date, strSender_Port As String, strSAP_Ind_CAPA As String, strSAP_Ind_CAPB As String, strSale_Not_Found_Email As String
+    Private gstrCompany_Id As String, gstrCompany_Name As String, glngFinancial_Year As Long
     Private gstrLock_Company_Id As String
-    Private dtVoucher_Date As Date
-    Private intNo_Of_Invoices_In_Each_File As Integer, intNo_Of_Items_In_Each_File As Integer, intInvoicing_As_Per_SAP_With_Prefix As Integer, intAPLY_GST As Integer, intRestore_Type_DBK As Integer
-    Private objfile_Stream As FileStream
-    Private objStreamWriter As StreamWriter
-    Private blnUpdate_Last_Char As Boolean
-    Private intTotal_Records As Integer, intRecord_Counter As Integer
-    Private objStreamReader As StreamReader
     'Private MyLog As New EventLog() ' create a new event log 
     Private outputZip As String '= "output zip file path"
-    Private inputZip As String '= "input zip file path"
-    Private inputFolder As String '= "input folder path"
-    Private outputFolder As String '= "output folder path"
-    Private strMonth As String
-    Private strFTP_Backup_Folder As String, strDelete_FTP_Backup_Folder As String
-    Private intBackup_Sequence_Control As Integer
-    Private strFTP_ADDR(10) As String, strFTP_USER(10) As String, strFTP_PASS(10) As String
-    Private intFTP_Type(10) As Integer
     Private strError As String
-
-    Private colFiles As Collection
+    Private strHead_Office_Id As String, strLocation_ID As String, inputFolder As String
     '*********************FTP START
     Private Declare Function InternetCloseHandle Lib "wininet.dll" (ByVal hInet As Long) As Integer
     Private Declare Function InternetConnect Lib "wininet.dll" Alias "InternetConnectA" (ByVal hInternetSession As Long, ByVal sServerName As String, ByVal nServerPort As Integer, ByVal sUserName As String, ByVal sPassword As String, ByVal lService As Long, ByVal lFlags As Long, ByVal lContext As Long) As Long
@@ -161,22 +102,17 @@ Public Class OMS_Dongle
 
     '*********************FTP END
     'Declare the shell object
-    Private shObj As Object = Activator.CreateInstance(Type.GetTypeFromProgID("Shell.Application"))
+    'Private shObj As Object = Activator.CreateInstance(Type.GetTypeFromProgID("Shell.Application"))
 
 
-    Private Shared Function customCertValidation(ByVal sender As Object,
-                                                ByVal cert As X509Certificate,
-                                                ByVal chain As X509Chain,
-                                                ByVal errors As SslPolicyErrors) As Boolean
+    'Private Shared Function customCertValidation(ByVal sender As Object, ByVal cert As X509Certificate, ByVal chain As X509Chain, ByVal errors As SslPolicyErrors) As Boolean
 
-        Return True
+    '    Return True
 
-    End Function
+    'End Function
 
     Public Sub New()
         MyBase.New()
-        blnBOD = True
-
         'Check if the the Event Log Exists 
         'If Not MyLog.SourceExists("OMS_Dongle") Then
         'MyLog.CreateEventSource("OMS_Dongle", "Client Log")
@@ -256,10 +192,12 @@ Public Class OMS_Dongle
     End Sub
 
     Private Sub Timer1_Elapsed(ByVal sender As System.Object, ByVal e As System.Timers.ElapsedEventArgs) Handles Timer1.Elapsed
-
         Timer1.Enabled = False
-        Refresh_Server_Data()
-        Timer1.Enabled = True
+        Try
+            Refresh_Server_Data()
+        Finally
+            Timer1.Enabled = True
+        End Try
     End Sub
 
     Private Function ReadINI() As Boolean
@@ -377,56 +315,58 @@ Public Class OMS_Dongle
             blnFirst_Line = False
             lngCounter = 1
             intCol_Count = 0
-            objStreamReader = New StreamReader(strSource_File)
-            Do
-                strLine = objStreamReader.ReadLine
-                If InStr(1, strLine, ",", vbTextCompare) > 0 Then
-                    If blnFirst_Line = False Then
-                        blnFirst_Line = True
-                        strheader = Split(strLine, ",")
-                        strSQL_String = "BEGIN"
-                        strSQL_String = strSQL_String & vbCrLf & "If EXISTS(SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" & strTABLE & "]') AND type in (N'U'))"
-                        strSQL_String = strSQL_String & vbCrLf & "DROP TABLE [dbo].[" & strTABLE & "]"
-                        strSQL_String = strSQL_String & vbCrLf & "CREATE TABLE [dbo].[" & strTABLE & "](Production_Date DateTime NULL"
-                        For intCounter = 0 To UBound(strheader)
-                            If Trim(UCase(strheader(intCounter))) = "" Then
-                                strSQL_String = strSQL_String & vbCrLf & ", Blank_Col varchar(1000) null"
-                                ''ElseIf Trim(UCase(strheader(intCounter))) = "LAST_LOGIN_DATE" And UCase(strTABLE) = UCase("User_Last_Login") Then
-                                ''strSQL_String = strSQL_String & vbCrLf & ", [" & Trim(UCase(strheader(intCounter))) & "] DATETIME null"
-                            Else
-                                strSQL_String = strSQL_String & vbCrLf & ", [" & Trim(UCase(strheader(intCounter))) & "] varchar(1000) null"
+            Using objStreamReader As New StreamReader(strSource_File)
+                Do
+                    strLine = objStreamReader.ReadLine
+                    If InStr(1, strLine, ",", vbTextCompare) > 0 Then
+                        If blnFirst_Line = False Then
+                            blnFirst_Line = True
+                            strheader = Split(strLine, ",")
+                            strSQL_String = "BEGIN"
+                            strSQL_String = strSQL_String & vbCrLf & "If EXISTS(SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" & strTABLE & "]') AND type in (N'U'))"
+                            strSQL_String = strSQL_String & vbCrLf & "DROP TABLE [dbo].[" & strTABLE & "]"
+                            strSQL_String = strSQL_String & vbCrLf & "CREATE TABLE [dbo].[" & strTABLE & "](Production_Date DateTime NULL"
+                            For intCounter = 0 To UBound(strheader)
+                                If Trim(UCase(strheader(intCounter))) = "" Then
+                                    strSQL_String = strSQL_String & vbCrLf & ", Blank_Col varchar(1000) null"
+                                    ''ElseIf Trim(UCase(strheader(intCounter))) = "LAST_LOGIN_DATE" And UCase(strTABLE) = UCase("User_Last_Login") Then
+                                    ''strSQL_String = strSQL_String & vbCrLf & ", [" & Trim(UCase(strheader(intCounter))) & "] DATETIME null"
+                                Else
+                                    strSQL_String = strSQL_String & vbCrLf & ", [" & Trim(UCase(strheader(intCounter))) & "] varchar(1000) null"
+                                End If
+                            Next
+                            strSQL_String = strSQL_String & vbCrLf & ")"
+                            strSQL_String = strSQL_String & vbCrLf & "END"
+
+                            Using cmd As New SqlCommand(strSQL_String, adoCon_Stock)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
+                        ElseIf lngCounter = 2 Or lngCounter = 500 Then
+                            If lngCounter = 500 Then
+                                Using cmd As New SqlCommand(strSQL_String, adoCon_Stock)
+                                    cmd.CommandTimeout = 0
+                                    cmd.ExecuteNonQuery()
+                                End Using
+
+                                lngCounter = 2
                             End If
-                        Next
-                        strSQL_String = strSQL_String & vbCrLf & ")"
-                        strSQL_String = strSQL_String & vbCrLf & "END"
 
-                        command = New SqlCommand(strSQL_String, adoCon_Stock)
-                        command.CommandTimeout = 0
-                        command.ExecuteNonQuery()
-
-                    ElseIf lngCounter = 2 Or lngCounter = 500 Then
-                        If lngCounter = 500 Then
-                            command = New SqlCommand(strSQL_String, adoCon_Stock)
-                            command.CommandTimeout = 0
-                            command.ExecuteNonQuery()
-
-                            lngCounter = 2
+                            strSQL_String = "INSERT INTO [dbo].[" & strTABLE & "]"
+                            strSQL_String = strSQL_String & vbCrLf & "VALUES(GETDATE(),RTRIM('" & Replace(Replace(strLine, "'", "''"), ",", "'),RTRIM('") & "'))"
+                        Else
+                            strSQL_String = strSQL_String & vbCrLf & ",(GETDATE(),RTRIM('" & Replace(Replace(strLine, "'", "''"), ",", "'),RTRIM('") & "'))"
                         End If
-
-                        strSQL_String = "INSERT INTO [dbo].[" & strTABLE & "]"
-                        strSQL_String = strSQL_String & vbCrLf & "VALUES(GETDATE(),RTRIM('" & Replace(Replace(strLine, "'", "''"), ",", "'),RTRIM('") & "'))"
-                    Else
-                        strSQL_String = strSQL_String & vbCrLf & ",(GETDATE(),RTRIM('" & Replace(Replace(strLine, "'", "''"), ",", "'),RTRIM('") & "'))"
+                        lngCounter = lngCounter + 1
                     End If
-                    lngCounter = lngCounter + 1
+                Loop Until strLine Is Nothing
+                If strSQL_String <> "" Then
+                    Using cmd As New SqlCommand(strSQL_String, adoCon_Stock)
+                        cmd.CommandTimeout = 0
+                        cmd.ExecuteNonQuery()
+                    End Using
                 End If
-            Loop Until strLine Is Nothing
-            If strSQL_String <> "" Then
-                command = New SqlCommand(strSQL_String, adoCon_Stock)
-                command.CommandTimeout = 0
-                command.ExecuteNonQuery()
-            End If
-            objStreamReader.Close()
+            End Using
             Import_CSV_File = True
         Catch ex4 As Exception
             Print_Error_Only("Import CSV File ", ex4)
@@ -474,24 +414,21 @@ Public Class OMS_Dongle
     '    End Try
     'End Function
 
-    Private Function Update_RSLog(ByVal strCompany_Id As String) As Boolean
-        Dim strConsume_Folder As String
+    Private Function Update_RSLog(ByRef adoCon_Company As SqlConnection, ByVal strCompany_Id As String) As Boolean
         Try
-            Dim adapter As New SqlDataAdapter
+            Dim adapter As SqlDataAdapter
             Dim adoRs_Stock As DataSet
-            Dim strFile As String
-            Dim strHeading As String
 
-            command = New SqlCommand("SELECT Monthly_Upload_Date FROM [RetailSoft_Company].[dbo].[tblRSInfo_Log] WHERE Company_Id = '" & strCompany_Id & "' AND MONTH(Monthly_Upload_Date) = MONTH(GETDATE()) AND Download_Upload = 3", adoCon_Company)
-            command.CommandTimeout = 0
+            Using command As New SqlCommand("SELECT Monthly_Upload_Date FROM [RetailSoft_Company].[dbo].[tblRSInfo_Log] WHERE Company_Id = '" & strCompany_Id & "' AND MONTH(Monthly_Upload_Date) = MONTH(GETDATE()) AND Download_Upload = 3", adoCon_Company)
+                command.CommandTimeout = 0
 
-            adapter = New SqlDataAdapter
-            adapter.SelectCommand = command
-            adoRs_Stock = New DataSet
-            adapter.Fill(adoRs_Stock)
-            adapter.Dispose()
-            adapter = Nothing
-            command.Dispose()
+                adapter = New SqlDataAdapter
+                adapter.SelectCommand = command
+                adoRs_Stock = New DataSet
+                adapter.Fill(adoRs_Stock)
+                adapter.Dispose()
+                adapter = Nothing
+            End Using
 
             If adoRs_Stock.Tables(0).Rows.Count = 0 Then
                 strSQL_String = "BEGIN"
@@ -501,38 +438,39 @@ Public Class OMS_Dongle
                 strSQL_String = strSQL_String & vbCrLf & "      UPDATE [RetailSoft_Company].DBO.tblRSInfo_Log SET Company_Id = '" & gstrCompany_Id & "', Entry_Date = GETDATE(), Monthly_Upload_Date = GETDATE() WHERE Company_Id = '" & gstrCompany_Id & "' AND Download_Upload = 3"
                 strSQL_String = strSQL_String & vbCrLf & "END"
 
-                command = New SqlCommand(strSQL_String, adoCon_Company)
-                command.CommandTimeout = 0
-                command.ExecuteNonQuery()
+                Using cmd As New SqlCommand(strSQL_String, adoCon_Company)
+                    cmd.CommandTimeout = 0
+                    cmd.ExecuteNonQuery()
+                End Using
                 Update_RSLog = True
             Else
                 Update_RSLog = False
             End If
-
+            adoRs_Stock.Dispose()
         Catch ex1 As Exception
             Print_Error_Only("Update_RSLog", ex1)
             Update_RSLog = False
         End Try
     End Function
 
-    Private Function Upload_RSInfo(ByVal strSetup_Path As String, ByVal strCompany_Id As String) As Boolean
+    Private Function Upload_RSInfo(ByRef adoCon_Company As SqlConnection, ByVal strSetup_Path As String, ByVal strCompany_Id As String) As Boolean
         Dim strConsume_Folder As String
         Try
-            Dim adapter As New SqlDataAdapter
+            Dim adapter As SqlDataAdapter
             Dim adoRs_Stock As DataSet
             Dim strFile As String
             Dim strHeading As String
 
-            command = New SqlCommand("SELECT Company_Id,CONVERT(VARCHAR,Exe_Date,103) + ' ' + CONVERT(VARCHAR,Exe_Date,108) AS Exe_Date,Exe_Size,Exe_Version,IP_Address,Server_Name,Info,Company,HO,Branch,Server_info,Go_Live FROM [RetailSoft_Company].[dbo].[tblRsInfo_Up] WHERE Company_Id = '" & strCompany_Id & "'", adoCon_Company)
-            command.CommandTimeout = 0
+            Using command As New SqlCommand("SELECT Company_Id,CONVERT(VARCHAR,Exe_Date,103) + ' ' + CONVERT(VARCHAR,Exe_Date,108) AS Exe_Date,Exe_Size,Exe_Version,IP_Address,Server_Name,Info,Company,HO,Branch,Server_info,Go_Live FROM [RetailSoft_Company].[dbo].[tblRsInfo_Up] WHERE Company_Id = '" & strCompany_Id & "'", adoCon_Company)
+                command.CommandTimeout = 0
 
-            adapter = New SqlDataAdapter
-            adapter.SelectCommand = command
-            adoRs_Stock = New DataSet
-            adapter.Fill(adoRs_Stock)
-            adapter.Dispose()
-            adapter = Nothing
-            command.Dispose()
+                adapter = New SqlDataAdapter
+                adapter.SelectCommand = command
+                adoRs_Stock = New DataSet
+                adapter.Fill(adoRs_Stock)
+                adapter.Dispose()
+                adapter = Nothing
+            End Using
 
             If adoRs_Stock.Tables(0).Rows.Count > 0 Then
                 strConsume_Folder = My.Application.Info.DirectoryPath & "\Log_Files"
@@ -544,18 +482,20 @@ Public Class OMS_Dongle
                 Adodb_To_CSV(adoRs_Stock, strFile, strHeading)
 
                 If Put_FTP_Files("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path, strFile, False) = True Then
-                    command = New SqlCommand("DELETE FROM [RetailSoft_Company].DBO.tblRsInfo_Up WHERE Company_Id = '" & strCompany_Id & "'", adoCon_Company)
-                    command.CommandTimeout = 0
-                    command.ExecuteNonQuery()
+                    Using cmd As New SqlCommand("DELETE FROM [RetailSoft_Company].DBO.tblRsInfo_Up WHERE Company_Id = '" & strCompany_Id & "'", adoCon_Company)
+                        cmd.CommandTimeout = 0
+                        cmd.ExecuteNonQuery()
+                    End Using
                 End If
                 File.Delete(strFile)
             End If
+            adoRs_Stock.Dispose()
         Catch ex1 As Exception
             Print_Error_Only("Upload_RSInfo", ex1)
         End Try
     End Function
 
-    Public Function Read_NetRed_Hasp_Lock(ByRef strString_Bytes As String)
+    Public Sub Read_NetRed_Hasp_Lock(ByRef strString_Bytes As String)
         Service = NET_READ_MEMO_BLOCK
         MemoHaspBuffer.txt = ""      ' Clear the buffer before reading
         p1 = 104
@@ -565,7 +505,7 @@ Public Class OMS_Dongle
         Call hasp(Service, SeedCode, ProgramNum, Passw1, Passw2, p1, p2, p3, p4&)
         If p3 <> 0 Then
             strString_Bytes = ""
-            Exit Function
+            Exit Sub
         End If
         Call ReadHaspBlock(Service, MemoHaspBuffer, p2)
         gstrCompany_Block1 = Left(MemoHaspBuffer.txt, 48)
@@ -578,7 +518,7 @@ Public Class OMS_Dongle
         Call hasp(Service, SeedCode, ProgramNum, Passw1, Passw2, p1, p2, p3, p4&)
         If p3 <> 0 Then
             strString_Bytes = ""
-            Exit Function
+            Exit Sub
         End If
         Call ReadHaspBlock(Service, MemoHaspBuffer, p2)
         gstrCompany_Block2 = Left(MemoHaspBuffer.txt, 48)
@@ -592,7 +532,7 @@ Public Class OMS_Dongle
         Call hasp(Service, SeedCode, ProgramNum, Passw1, Passw2, p1, p2, p3, p4&)
         If p3 <> 0 Then
             strString_Bytes = ""
-            Exit Function
+            Exit Sub
         End If
         Call ReadHaspBlock(Service, MemoHaspBuffer, p2)
         gstrCompany_Block3 = Left(MemoHaspBuffer.txt, 48)
@@ -606,7 +546,7 @@ Public Class OMS_Dongle
         Call hasp(Service, SeedCode, ProgramNum, Passw1, Passw2, p1, p2, p3, p4&)
         If p3 <> 0 Then
             strString_Bytes = ""
-            Exit Function
+            Exit Sub
         End If
         Call ReadHaspBlock(Service, MemoHaspBuffer, p2)
         gstrCompany_Desc_Block = Left(MemoHaspBuffer.txt, 48)
@@ -618,7 +558,7 @@ Public Class OMS_Dongle
         Call hasp(Service, SeedCode, ProgramNum, Passw1, Passw2, p1, p2, p3, p4&)
         If p3 <> 0 Then
             strString_Bytes = ""
-            Exit Function
+            Exit Sub
         End If
         Call ReadHaspBlock(Service, MemoHaspBuffer, p2)
         strString_Bytes = Left(MemoHaspBuffer.txt, 48)
@@ -633,7 +573,7 @@ Public Class OMS_Dongle
         'MsgBox Left(MemoHaspBuffer.txt, 48)
         strString_Bytes = strString_Bytes & Left(MemoHaspBuffer.txt, 48)
 
-    End Function
+    End Sub
 
     Public Function Search_Lock() As Boolean
         Dim strString_Bytes As String
@@ -700,7 +640,7 @@ Public Class OMS_Dongle
         End If
     End Function
 
-    Private Function Download_RSInfo(ByVal strSetup_Path As String, ByVal strCompany_Id As String) As Boolean
+    Private Function Download_RSInfo(ByRef adoCon_Company As SqlConnection, ByVal strSetup_Path As String, ByVal strCompany_Id As String) As Boolean
         '''TS-1838 | Retail-Soft service should check for the specific key available on FTP and consume it once available for the store.
         Try
             Dim strConsume_Folder As String
@@ -730,21 +670,21 @@ Public Class OMS_Dongle
                             File.Delete(strConsume_Folder & "/" & strCurrentFile)
                         End If
                         If Get_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile, strConsume_Folder & "/" & strCurrentFile) = True Then
-                            objStreamReader = New StreamReader(strConsume_Folder & "/" & strCurrentFile)
-                            Do
-                                strLine = objStreamReader.ReadLine
-                                Exit Do
-                            Loop Until strLine Is Nothing
-                            objStreamReader.Close()
+                            Using objStreamReader As New StreamReader(strConsume_Folder & "/" & strCurrentFile)
+                                Do
+                                    strLine = objStreamReader.ReadLine
+                                    Exit Do
+                                Loop Until strLine Is Nothing
+                            End Using
                             If File.Exists(strConsume_Folder & "/" & strCurrentFile) Then
                                 File.Delete(strConsume_Folder & "/" & strCurrentFile)
                             End If
                             gstrSMS_Message = ""
-                            If Update_Lock_From_FTP(strLine) = True Then
+                            If Update_Lock_From_FTP(adoCon_Company, strLine) = True Then
                                 If Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile) = True Then
                                     blnSuccess = True
                                     If gstrSMS_Message <> "" And gstrHasp_LockId <> "1917058163" Then
-                                        Send_SMS_SP("9922964296", gstrSMS_Message)
+                                        Send_SMS_SP(adoCon_Company, "9922964296", gstrSMS_Message)
                                         'Send_SMS_SP("9326264245", gstrSMS_Message)
                                     End If
                                 End If
@@ -765,7 +705,7 @@ Public Class OMS_Dongle
     Public Function ConvertStr(ByVal strNum As String) As String
         Dim lngCounter As Long
         Dim strReturn As String
-
+        strReturn = ""
         For lngCounter = 1 To Len(strNum)
             If Asc(Mid(strNum, lngCounter, 1)) = 82 Then
                 strReturn = strReturn & Chr(48)
@@ -868,16 +808,9 @@ Public Class OMS_Dongle
         End If
     End Function
 
-    Public Function ChangeLockInfo(ByVal intCompany_No As Integer, ByVal gobjTempLockFlag As enumLock_Type, ByVal strAction As String, ByVal strNew_Value As String) As Boolean
+    Public Function ChangeLockInfo(ByRef adoCon_Company As SqlConnection, ByVal intCompany_No As Integer, ByVal gobjTempLockFlag As enumLock_Type, ByVal strAction As String, ByVal strNew_Value As String) As Boolean
         Dim strLock_Information As String
-        Dim strVersion_String As String
-        Dim strSerial_Key As String
-        Dim strReturnedString As String
-        Dim strCompany_Desc As String
-        Dim lngFree_File As Long
-        Dim lngErr_File As Long
-        Dim strFile_Name As String
-
+        strLock_Information = ""
         ChangeLockInfo = True
         If gobjTempLockFlag = enumLock_Type.LOCK_LOCAL_RED_HASP Or gobjTempLockFlag = enumLock_Type.LOCK_LOCAL_USB_RED_HASP Then
             If strAction = "A" Then 'HERE "A" DENOTE FOR COMPANY NAME
@@ -1030,15 +963,16 @@ Public Class OMS_Dongle
             End If
         End If
         If ChangeLockInfo = True Then
-            Lock_Log_File(intCompany_No, gobjTempLockFlag, strAction, strNew_Value)
+            Lock_Log_File(adoCon_Company, intCompany_No, gobjTempLockFlag, strAction, strNew_Value)
         End If
     End Function
 
-    Private Sub Lock_Log_File(ByVal intCompany_No As Integer, ByVal gobjTempLockFlag As enumLock_Type, ByVal strAction As String, ByVal strNew_Value As String)
+    Private Sub Lock_Log_File(ByRef adoCon_Company As SqlConnection, ByVal intCompany_No As Integer, ByVal gobjTempLockFlag As enumLock_Type, ByVal strAction As String, ByVal strNew_Value As String)
         Try
-            Dim adocommand As New SqlCommand("INSERT INTO [RetailSoft_Company].dbo.tblLock_Log(Entry_Date,Action,Company_Position,Lock_Type,New_Values,Updated_By_IP,Updated_By_Machine)VALUES(GETDATE(),'" & strAction & "'," & intCompany_No & "," & gobjTempLockFlag & ",'" & Replace(strNew_Value, "'", "''") & "','" & gstrServer_IP_Address & "','" & gstrServer_Name & "')", adoCon_Company)
-            adocommand.CommandTimeout = 0
-            adocommand.ExecuteNonQuery()
+            Using cmd As New SqlCommand("INSERT INTO [RetailSoft_Company].dbo.tblLock_Log(Entry_Date,Action,Company_Position,Lock_Type,New_Values,Updated_By_IP,Updated_By_Machine)VALUES(GETDATE(),'" & strAction & "'," & intCompany_No & "," & gobjTempLockFlag & ",'" & Replace(strNew_Value, "'", "''") & "','" & gstrServer_IP_Address & "','" & gstrServer_Name & "')", adoCon_Company)
+                cmd.CommandTimeout = 0
+                cmd.ExecuteNonQuery()
+            End Using
         Catch ex1 As Exception
             Print_Error_Only("Lock_Log_File", ex1)
         End Try
@@ -1284,7 +1218,7 @@ Public Class OMS_Dongle
         End If
     End Function
 
-    Private Function Update_Lock_From_FTP(ByVal strUpdate_Values As String) As Boolean
+    Private Function Update_Lock_From_FTP(ByRef adoCon_Company As SqlConnection, ByVal strUpdate_Values As String) As Boolean
         Dim blnFlag As Boolean
         Dim strSQL_String As String
         Dim intUpdate_Failed As Integer
@@ -1300,13 +1234,12 @@ Public Class OMS_Dongle
             If strInitial = "Q" Then
                 strSQL_String = Mid(Trim(strUpdate_Values), 6, 5)
                 If CDate(Format(Now(), "dd/MM/yyyy")) = CDate(ConvertStr(Mid(strSQL_String, 1, 2)) & "/" & ConvertStr(Mid(strSQL_String, 3, 2)) & "/" & ConvertYear(Mid(strSQL_String, 5, 1))) Then
-                    ChangeLockInfo(0, gobjLock_Type, "$", gstrCompany_Id & "z")
+                    ChangeLockInfo(adoCon_Company, 0, gobjLock_Type, "$", gstrCompany_Id & "z")
                     blnFlag = True
                 Else
                     intUpdate_Failed = 1
                 End If
             ElseIf strInitial = "P" Then
-                Dim blnFound As Boolean
                 gstrCompanies_Block = gstrCompany_Block1 & gstrCompany_Block2 & gstrCompany_Block3 & gstrCompany_Desc_Block
                 If InStr(1, gstrAllowed_Multiple_Companies_LockIds, gstrHasp_LockId) > 0 Then
                     'MsgBox "Secondary Company not allowed to write on whitelisted and disk Lock", vbCritical, "Alert"
@@ -1368,7 +1301,7 @@ Public Class OMS_Dongle
                 If IsDate(ConvertStr(Mid(strSQL_String, 1, 2)) & "/" & ConvertStr(Mid(strSQL_String, 3, 2)) & "/" & ConvertYear(Mid(strSQL_String, 5, 1))) = False Then
                 ElseIf IsDate(ConvertStr(Mid(strSQL_String, 6, 2)) & "/" & ConvertStr(Mid(strSQL_String, 8, 2)) & "/" & ConvertYear(Mid(strSQL_String, 10, 1))) = False Then
                 Else
-                    If ChangeLockInfo(0, gobjLock_Type, "D", ConvertStr(Mid(strSQL_String, 1, 2)) & ConvertStr(Mid(strSQL_String, 3, 2)) & ConvertYear(Mid(strSQL_String, 5, 1)) & ConvertStr(Mid(strSQL_String, 6, 2)) & ConvertStr(Mid(strSQL_String, 8, 2)) & ConvertYear(Mid(strSQL_String, 10, 1))) = True Then
+                    If ChangeLockInfo(adoCon_Company, 0, gobjLock_Type, "D", ConvertStr(Mid(strSQL_String, 1, 2)) & ConvertStr(Mid(strSQL_String, 3, 2)) & ConvertYear(Mid(strSQL_String, 5, 1)) & ConvertStr(Mid(strSQL_String, 6, 2)) & ConvertStr(Mid(strSQL_String, 8, 2)) & ConvertYear(Mid(strSQL_String, 10, 1))) = True Then
                         blnFlag = True
                     Else
                         intUpdate_Failed = 1
@@ -1377,21 +1310,22 @@ Public Class OMS_Dongle
             ElseIf strInitial = "U" Then
                 strSQL_String = Mid(Trim(strUpdate_Values), 6, 5)
                 If CDate(Format(Now(), "dd/MMM/yyyy")) = CDate(ConvertStr(Mid(strSQL_String, 1, 2)) & "/" & MonthName(ConvertStr(Mid(strSQL_String, 3, 2)), True) & "/" & ConvertYear(Mid(strSQL_String, 5, 1))) Then
+                    Using cmd As New SqlCommand("UPDATE [RetailSoft_Company].DBO.tblCompany_Detail SET Exe_Date = NULL ", adoCon_Company)
+                        cmd.CommandTimeout = 0
+                        cmd.ExecuteNonQuery()
+                    End Using
 
-                    Dim adocommand As New SqlCommand("UPDATE [RetailSoft_Company].DBO.tblCompany_Detail SET Exe_Date = NULL ", adoCon_Company)
-                    adocommand.CommandTimeout = 0
-                    adocommand.ExecuteNonQuery()
-
-                    adocommand = New SqlCommand("DELETE FROM [RetailSoft_Company].DBO.tblServer", adoCon_Company)
-                    adocommand.CommandTimeout = 0
-                    adocommand.ExecuteNonQuery()
+                    Using cmd As New SqlCommand("DELETE FROM [RetailSoft_Company].DBO.tblServer", adoCon_Company)
+                        cmd.CommandTimeout = 0
+                        cmd.ExecuteNonQuery()
+                    End Using
 
                     blnFlag = True
                 End If
             Else
                 strSQL_String = Mid(Trim(strUpdate_Values), 6, 5)
                 If CDate(Format(Now(), "dd/MMM/yyyy")) = CDate(ConvertStr(Mid(strSQL_String, 1, 2)) & "/" & MonthName(ConvertStr(Mid(strSQL_String, 3, 2)), True) & "/" & ConvertYear(Mid(strSQL_String, 5, 1))) Then
-                    If ChangeLockInfo(0, gobjLock_Type, strInitial, ConvertVersion(Mid(Trim(strUpdate_Values), 11, Len(Trim(strUpdate_Values))))) = True Then
+                    If ChangeLockInfo(adoCon_Company, 0, gobjLock_Type, strInitial, ConvertVersion(Mid(Trim(strUpdate_Values), 11, Len(Trim(strUpdate_Values))))) = True Then
                         blnFlag = True
                     Else
                         intUpdate_Failed = 1
@@ -1421,310 +1355,321 @@ Public Class OMS_Dongle
     Private Function Asset_Service_Whats_Up()
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Central_YSIPL;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
 
-        Dim adoSMS As New SqlConnection(connetionString)
-        Try
-
-            adoSMS.Open()
-
-            connetionString = ""
-
-            Dim adapter As New SqlDataAdapter
+        Using adoSMS As New SqlConnection(connetionString)
             Dim adoRs_SMS As New DataSet
-            Dim strMobile_No As String
+            Try
 
-            strSQL_String = "SELECT * FROM tblAsset_Register_Mast WHERE Send_SMS=1 AND CAST(GETDATE() AS TIME) >= '11:30:00' AND (GETDATE() > CAST(Next_SMS_On AS DATE) OR Next_SMS_On IS NULL) AND CAST(GETDATE() AS DATE) > DATEADD(DAY,-8,Service_Due_Date) AND CAST(GETDATE() AS DATE) < Service_Due_Date"
+                adoSMS.Open()
 
-            adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
-            adapter.Fill(adoRs_SMS)
-            adapter.Dispose()
-            For i = 0 To adoRs_SMS.Tables(0).Rows.Count - 1
-                With adoRs_SMS.Tables(0).Rows(i)
-                    Dim adocommand As SqlCommand
-                    Dim strWhatsUP_Msg As String
-                    Dim intAsset_Id As Integer
+                connetionString = ""
 
-                    strWhatsUP_Msg = "Remainder : "
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*Service is pending for following Asset*"
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "      Asset Name : " & Trim(.Item("Asset_Name") & "")
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Service Due Date : " & Format(.Item("Service_Due_Date"), "dd/MM/yyyy")
+                Dim adapter As New SqlDataAdapter
+                Dim strMobile_No As String
 
-                    intAsset_Id = Val(.Item("Asset_Id") & "")
+                strSQL_String = "SELECT * FROM tblAsset_Register_Mast WHERE Send_SMS=1 AND CAST(GETDATE() AS TIME) >= '11:30:00' AND (GETDATE() > CAST(Next_SMS_On AS DATE) OR Next_SMS_On IS NULL) AND CAST(GETDATE() AS DATE) > DATEADD(DAY,-8,Service_Due_Date) AND CAST(GETDATE() AS DATE) < Service_Due_Date"
 
-                    strMobile_No = "919324245252,919922964296"
+                adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
+                adapter.Fill(adoRs_SMS)
+                adapter.Dispose()
+                For i = 0 To adoRs_SMS.Tables(0).Rows.Count - 1
+                    With adoRs_SMS.Tables(0).Rows(i)
+                        Dim strWhatsUP_Msg As String
+                        Dim intAsset_Id As Integer
+
+                        strWhatsUP_Msg = "Reminder : "
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*Service is pending for following Asset*"
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "      Asset Name : " & Trim(.Item("Asset_Name") & "")
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Service Due Date : " & Format(.Item("Service_Due_Date"), "dd/MM/yyyy")
+
+                        intAsset_Id = Val(.Item("Asset_Id") & "")
+
+                        strMobile_No = "919324245252,919922964296"
 
 
-                    strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
+                        strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
 
-                    adocommand = New SqlCommand(strSQL_String, adoSMS)
-                    adocommand.CommandTimeout = 0
-                    adocommand.ExecuteNonQuery()
+                        Using cmd As New SqlCommand(strSQL_String, adoSMS)
+                            cmd.CommandTimeout = 0
+                            cmd.ExecuteNonQuery()
+                        End Using
 
-                    adocommand = New SqlCommand("RECONFIGURE", adoSMS)
-                    adocommand.CommandTimeout = 0
-                    adocommand.ExecuteNonQuery()
+                        Using cmd As New SqlCommand("RECONFIGURE", adoSMS)
+                            cmd.CommandTimeout = 0
+                            cmd.ExecuteNonQuery()
+                        End Using
 
-                    strSQL_String = "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
-                    adocommand = New SqlCommand(strSQL_String, adoSMS)
-                    adocommand.CommandTimeout = 0
-                    adocommand.ExecuteNonQuery()
+                        strSQL_String = "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
+                        Using cmd As New SqlCommand(strSQL_String, adoSMS)
+                            cmd.CommandTimeout = 0
+                            cmd.ExecuteNonQuery()
+                        End Using
 
-                    adocommand = New SqlCommand("RECONFIGURE", adoSMS)
-                    adocommand.CommandTimeout = 0
-                    adocommand.ExecuteNonQuery()
+                        Using cmd As New SqlCommand("RECONFIGURE", adoSMS)
+                            cmd.CommandTimeout = 0
+                            cmd.ExecuteNonQuery()
+                        End Using
 
-                    'adocommand = New SqlCommand("EXEC [" & strCentral_Database & "].dbo.spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', '1707166280617387783', 0", adoSMS)
-                    adocommand = New SqlCommand("EXEC spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strWhatsUP_Msg), "'", "''")) & "', 0", adoSMS)
-                    adocommand.CommandTimeout = 0
-                    adocommand.ExecuteNonQuery()
+                        'adocommand = New SqlCommand("EXEC [" & strCentral_Database & "].dbo.spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', '1707166280617387783', 0", adoSMS)
+                        Using cmd As New SqlCommand("EXEC spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strWhatsUP_Msg), "'", "''")) & "', 0", adoSMS)
+                            cmd.CommandTimeout = 0
+                            cmd.ExecuteNonQuery()
+                        End Using
 
-                    strSQL_String = "UPDATE tblAsset_Register_Mast SET Next_SMS_On = GETDATE()+1 WHERE Asset_Id = " & intAsset_Id
-
-                    adocommand = New SqlCommand(strSQL_String, adoSMS)
-                    adocommand.CommandTimeout = 0
-                    adocommand.ExecuteNonQuery()
-
-                End With
-            Next
-        Catch ex1 As Exception
-            If connetionString = "" Then
-                Print_Error_Only("Asset Service Whats Up", ex1)
-            End If
-        End Try
-        adoSMS.Close()
-        adoSMS.Dispose()
+                        strSQL_String = "UPDATE tblAsset_Register_Mast SET Next_SMS_On = GETDATE()+1 WHERE Asset_Id = " & intAsset_Id
+                        Using cmd As New SqlCommand(strSQL_String, adoSMS)
+                            cmd.CommandTimeout = 0
+                            cmd.ExecuteNonQuery()
+                        End Using
+                    End With
+                Next
+            Catch ex1 As Exception
+                If connetionString = "" Then
+                    Print_Error_Only("Asset Service Whats Up", ex1)
+                End If
+            End Try
+            adoRs_SMS.Dispose()
+        End Using
     End Function
 
     Private Function Whats_Up_Remainder_Send()
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
 
-        Dim adoSMS As New SqlConnection(connetionString)
-        Try
-
-            adoSMS.Open()
-
-            connetionString = ""
-
-            Dim adapter As New SqlDataAdapter
+        Using adoSMS As New SqlConnection(connetionString)
             Dim adoRs_SMS As New DataSet
-            Dim strMessage As String
-            Dim strMobile_No As String
-            Dim intRepeat_Event_Reminder As Integer
-            Dim strNext_SMS_On As String
-            Dim lngEvent_Id As Long
-            Dim intSMS_Days_After As Integer
 
-            Dim strCompany_Database As String
-            Dim strCentral_Database As String
+            Try
 
-            'strSQL_String = "SELECT * FROM tblEvent_Mast WHERE (Send_SMS=1 OR CAST(GETDATE() AS DATE)>Event_Date) AND GETDATE() > Next_SMS_On AND (Repeat_Option=0 OR Remainder_End_Date >= CAST(GETDATE() AS DATE))"
+                adoSMS.Open()
 
-            strSQL_String = "SELECT 'OMSSoft-' + Company_Id + '-'+ Head_Office_Id + '-' + Location_Id + '-' + CAST(Financial_Year AS VARCHAR(10)) AS Company_Database, Central_Database FROM [OMSSoft_Company].[dbo].[tblCompany_Detail]"
-            strSQL_String = strSQL_String & vbCrLf & "WHERE LEN(Financial_Year)=8 AND (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT)) ORDER BY Company_Id"
+                connetionString = ""
 
-            adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
-            adapter.Fill(adoRs_SMS)
-            adapter.Dispose()
-            For i = 0 To adoRs_SMS.Tables(0).Rows.Count - 1
-                With adoRs_SMS.Tables(0).Rows(i)
-                    Dim adocommand As SqlCommand
-                    Dim strLeave_Application_Ids As String
+                Dim adapter As New SqlDataAdapter
 
-                    strLeave_Application_Ids = ""
-                    strCompany_Database = Trim(.Item("Company_Database") & "")
+                Dim strMessage As String
+                Dim strMobile_No As String
+                Dim strCompany_Database As String
+                Dim strCentral_Database As String
 
-                    strCentral_Database = Trim(.Item("Central_Database") & "")
+                'strSQL_String = "SELECT * FROM tblEvent_Mast WHERE (Send_SMS=1 OR CAST(GETDATE() AS DATE)>Event_Date) AND GETDATE() > Next_SMS_On AND (Repeat_Option=0 OR Remainder_End_Date >= CAST(GETDATE() AS DATE))"
 
-                    strMobile_No = "919922964296"
+                strSQL_String = "SELECT 'OMSSoft-' + Company_Id + '-'+ Head_Office_Id + '-' + Location_Id + '-' + CAST(Financial_Year AS VARCHAR(10)) AS Company_Database, Central_Database FROM [OMSSoft_Company].[dbo].[tblCompany_Detail]"
+                strSQL_String = strSQL_String & vbCrLf & "WHERE LEN(Financial_Year)=8 AND (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT)) ORDER BY Company_Id"
 
-                    'strMobile_No = "917588407565"
-                    strMessage = Send_WhatsUp2(strCentral_Database, strCompany_Database, strLeave_Application_Ids)
-                    'strMessage = "Hello"
-                    If strMessage <> "" And strLeave_Application_Ids <> "" And strLeave_Application_Ids <> "''" Then
+                adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
+                adapter.Fill(adoRs_SMS)
+                adapter.Dispose()
+                For i = 0 To adoRs_SMS.Tables(0).Rows.Count - 1
+                    With adoRs_SMS.Tables(0).Rows(i)
+                        Dim strLeave_Application_Ids As String
 
-                        strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
+                        strLeave_Application_Ids = ""
+                        strCompany_Database = Trim(.Item("Company_Database") & "")
 
-                        adocommand = New SqlCommand(strSQL_String, adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
+                        strCentral_Database = Trim(.Item("Central_Database") & "")
 
-                        adocommand = New SqlCommand("RECONFIGURE", adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
+                        strMobile_No = "919922964296"
 
-                        strSQL_String = "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
-                        adocommand = New SqlCommand(strSQL_String, adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
+                        'strMobile_No = "917588407565"
+                        strMessage = Send_WhatsUp2(strCentral_Database, strCompany_Database, strLeave_Application_Ids)
+                        'strMessage = "Hello"
+                        If strMessage <> "" And strLeave_Application_Ids <> "" And strLeave_Application_Ids <> "''" Then
 
-                        adocommand = New SqlCommand("RECONFIGURE", adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
+                            strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
 
-                        'adocommand = New SqlCommand("EXEC [" & strCentral_Database & "].dbo.spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', '1707166280617387783', 0", adoSMS)
-                        adocommand = New SqlCommand("EXEC [" & strCentral_Database & "].dbo.spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', 0", adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
-                    End If
-                    If strLeave_Application_Ids <> "" And strLeave_Application_Ids <> "''" Then
-                        strSQL_String = "UPDATE [" & strCompany_Database & "].dbo.tblLeave_Application SET Last_Msg_Send = GETDATE() WHERE Leave_Application_Id IN (" & strLeave_Application_Ids & ")"
+                            Using cmd As New SqlCommand(strSQL_String, adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
 
-                        adocommand = New SqlCommand(strSQL_String, adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
-                    End If
-                End With
-            Next
-        Catch ex1 As Exception
-            If connetionString = "" Then
-                Print_Error_Only("OMS Event SMS Send", ex1)
-            End If
-        End Try
-        adoSMS.Close()
-        adoSMS.Dispose()
+                            Using cmd As New SqlCommand("RECONFIGURE", adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
+
+                            strSQL_String = "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
+                            Using cmd As New SqlCommand(strSQL_String, adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
+
+                            Using cmd As New SqlCommand("RECONFIGURE", adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
+
+                            'adocommand = New SqlCommand("EXEC [" & strCentral_Database & "].dbo.spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', '1707166280617387783', 0", adoSMS)
+                            Using cmd As New SqlCommand("EXEC [" & strCentral_Database & "].dbo.spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', 0", adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
+                        End If
+                        If strLeave_Application_Ids <> "" And strLeave_Application_Ids <> "''" Then
+                            strSQL_String = "UPDATE [" & strCompany_Database & "].dbo.tblLeave_Application SET Last_Msg_Send = GETDATE() WHERE Leave_Application_Id IN (" & strLeave_Application_Ids & ")"
+
+                            Using cmd As New SqlCommand(strSQL_String, adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
+                        End If
+                    End With
+                Next
+            Catch ex1 As Exception
+                If connetionString = "" Then
+                    Print_Error_Only("OMS Event SMS Send", ex1)
+                End If
+            End Try
+            adoRs_SMS.Dispose()
+        End Using
     End Function
 
     Private Function OMS_Event_SMS_Send()
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Central_YSIPL;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
 
-        Dim adoSMS As New SqlConnection(connetionString)
-        Try
-            adoSMS.Open()
-            connetionString = ""
-            Dim adapter As New SqlDataAdapter
+        Using adoSMS As New SqlConnection(connetionString)
             Dim adoRs_SMS As New DataSet
-            Dim strMessage As String
-            Dim strMobile_No As String
-            Dim intRepeat_Event_Reminder As Integer
-            Dim strNext_SMS_On As String
-            Dim strEvent_Days As String
-            Dim lngEvent_Id As Long
-            Dim intSMS_Days_After As Integer
-
-            'strSQL_String = "SELECT * FROM tblEvent_Mast WHERE (Send_SMS=1 OR CAST(GETDATE() AS DATE)>Event_Date) AND GETDATE() > Next_SMS_On AND (Repeat_Option=0 OR Remainder_End_Date >= CAST(GETDATE() AS DATE))"
+            Try
+                adoSMS.Open()
+                connetionString = ""
 
 
-            strSQL_String = "Select EVN.*, GO_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=CAST(SMS_From_Date AS DATE) AND CAST(GETDATE() AS DATE)<=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE 0 END), EHM.Event_Head_Desc, MSM.Message_Desc, MSM.Message, MEM.Mobile_No AS Event_Member_Mobile_No, MEM1.Mobile_No AS SMS1_Mobile_No, MEM2.Mobile_No AS SMS2_Mobile_No, MEM3.Mobile_No AS SMS3_Mobile_No FROM tblEvent_Mast EVN"
-            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblEvent_Head_Mast EHM ON EHM.Event_Head_Id = EVN.Event_Head_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMessage_Mast MSM ON MSM.Message_Id = EVN.Message_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM ON MEM.Member_Id = EVN.Event_Member_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM1 ON MEM1.Member_Id = EVN.SMS1_Member_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM2 ON MEM2.Member_Id = EVN.SMS2_Member_Id"
-            strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM3 ON MEM3.Member_Id = EVN.SMS3_Member_Id"
-            strSQL_String = strSQL_String & vbCrLf & "WHERE (EVN.Send_SMS=1 OR CAST(GETDATE() AS DATE)>EVN.Event_Date) AND GETDATE() > EVN.Next_SMS_On AND (EVN.Repeat_Option=0 OR EVN.Remainder_End_Date >= CAST(GETDATE() AS DATE))"
-            strSQL_String = strSQL_String & vbCrLf & "AND CAST(GETDATE() AS TIME)>=CAST(SMS_From_Date AS TIME)"
+                Dim strMessage As String
+                Dim strMobile_No As String
+                Dim intRepeat_Event_Reminder As Integer
+                Dim strNext_SMS_On As String
+                Dim strEvent_Days As String
+                Dim lngEvent_Id As Long
+                Dim intSMS_Days_After As Integer
 
-            adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
-            adapter.Fill(adoRs_SMS)
-            adapter.Dispose()
-            For i = 0 To adoRs_SMS.Tables(0).Rows.Count - 1
-                With adoRs_SMS.Tables(0).Rows(i)
-                    Dim adocommand As SqlCommand
+                'strSQL_String = "SELECT * FROM tblEvent_Mast WHERE (Send_SMS=1 OR CAST(GETDATE() AS DATE)>Event_Date) AND GETDATE() > Next_SMS_On AND (Repeat_Option=0 OR Remainder_End_Date >= CAST(GETDATE() AS DATE))"
 
-                    lngEvent_Id = Val(.Item("Event_Id"))
-                    strEvent_Days = Trim(.Item("Event_Days") & "")
-                    strMobile_No = Trim(.Item("Event_Member_Mobile_No") & "")
-                    If Len(strMobile_No) = 10 Then
-                        strMobile_No = "91" & strMobile_No
-                    End If
-                    If Len(Trim(.Item("SMS1_Mobile_No") & "")) >= 10 Then
-                        If Len(Trim(.Item("SMS1_Mobile_No") & "")) = 10 Then
-                            strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS1_Mobile_No") & "")
-                        Else
-                            strMobile_No = strMobile_No & "," & Trim(.Item("SMS1_Mobile_No") & "")
+
+                strSQL_String = "Select EVN.*, GO_SMS = (CASE WHEN CAST(GETDATE() AS DATE)>=CAST(SMS_From_Date AS DATE) AND CAST(GETDATE() AS DATE)<=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE 0 END), EHM.Event_Head_Desc, MSM.Message_Desc, MSM.Message, MEM.Mobile_No AS Event_Member_Mobile_No, MEM1.Mobile_No AS SMS1_Mobile_No, MEM2.Mobile_No AS SMS2_Mobile_No, MEM3.Mobile_No AS SMS3_Mobile_No FROM tblEvent_Mast EVN"
+                strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblEvent_Head_Mast EHM ON EHM.Event_Head_Id = EVN.Event_Head_Id"
+                strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMessage_Mast MSM ON MSM.Message_Id = EVN.Message_Id"
+                strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM ON MEM.Member_Id = EVN.Event_Member_Id"
+                strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM1 ON MEM1.Member_Id = EVN.SMS1_Member_Id"
+                strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM2 ON MEM2.Member_Id = EVN.SMS2_Member_Id"
+                strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM3 ON MEM3.Member_Id = EVN.SMS3_Member_Id"
+                strSQL_String = strSQL_String & vbCrLf & "WHERE (EVN.Send_SMS=1 OR CAST(GETDATE() AS DATE)>EVN.Event_Date) AND GETDATE() > EVN.Next_SMS_On AND (EVN.Repeat_Option=0 OR EVN.Remainder_End_Date >= CAST(GETDATE() AS DATE))"
+                strSQL_String = strSQL_String & vbCrLf & "AND CAST(GETDATE() AS TIME)>=CAST(SMS_From_Date AS TIME)"
+
+                Using adapter As New SqlDataAdapter
+                    adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
+                    adapter.Fill(adoRs_SMS)
+                End Using
+                For i = 0 To adoRs_SMS.Tables(0).Rows.Count - 1
+                    With adoRs_SMS.Tables(0).Rows(i)
+                        lngEvent_Id = Val(.Item("Event_Id"))
+                        strEvent_Days = Trim(.Item("Event_Days") & "")
+                        strMobile_No = Trim(.Item("Event_Member_Mobile_No") & "")
+                        If Len(strMobile_No) = 10 Then
+                            strMobile_No = "91" & strMobile_No
                         End If
-                    End If
-                    If Len(Trim(.Item("SMS2_Mobile_No") & "")) >= 10 Then
-                        If Len(Trim(.Item("SMS2_Mobile_No") & "")) = 10 Then
-                            strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS2_Mobile_No") & "")
-                        Else
-                            strMobile_No = strMobile_No & "," & Trim(.Item("SMS2_Mobile_No") & "")
+                        If Len(Trim(.Item("SMS1_Mobile_No") & "")) >= 10 Then
+                            If Len(Trim(.Item("SMS1_Mobile_No") & "")) = 10 Then
+                                strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS1_Mobile_No") & "")
+                            Else
+                                strMobile_No = strMobile_No & "," & Trim(.Item("SMS1_Mobile_No") & "")
+                            End If
                         End If
-                    End If
-                    If Len(Trim(.Item("SMS3_Mobile_No") & "")) >= 10 Then
-                        If Len(Trim(.Item("SMS3_Mobile_No") & "")) = 10 Then
-                            strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS3_Mobile_No") & "")
-                        Else
-                            strMobile_No = strMobile_No & "," & Trim(.Item("SMS3_Mobile_No") & "")
+                        If Len(Trim(.Item("SMS2_Mobile_No") & "")) >= 10 Then
+                            If Len(Trim(.Item("SMS2_Mobile_No") & "")) = 10 Then
+                                strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS2_Mobile_No") & "")
+                            Else
+                                strMobile_No = strMobile_No & "," & Trim(.Item("SMS2_Mobile_No") & "")
+                            End If
                         End If
-                    End If
-                    'strMobile_No = "919326264245"
-                    If IsDBNull(.Item("Message")) = True Then
-                        strMessage = .Item("Event_Message") & ""
-                    Else
-                        strMessage = .Item("Message") & ""
-                    End If
+                        If Len(Trim(.Item("SMS3_Mobile_No") & "")) >= 10 Then
+                            If Len(Trim(.Item("SMS3_Mobile_No") & "")) = 10 Then
+                                strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS3_Mobile_No") & "")
+                            Else
+                                strMobile_No = strMobile_No & "," & Trim(.Item("SMS3_Mobile_No") & "")
+                            End If
+                        End If
+                        'strMobile_No = "919326264245"
+                        If IsDBNull(.Item("Message")) = True Then
+                            strMessage = .Item("Event_Message") & ""
+                        Else
+                            strMessage = .Item("Message") & ""
+                        End If
 
-                    strMessage = Replace(strMessage, "<Event Head>", .Item("Event_Head_Desc") & "")
-                    strMessage = Replace(strMessage, "<Event Date>", Format(.Item("Event_Date"), "dd/MM/yyyy") & "")
+                        strMessage = Replace(strMessage, "<Event Head>", .Item("Event_Head_Desc") & "")
+                        strMessage = Replace(strMessage, "<Event Date>", Format(.Item("Event_Date"), "dd/MM/yyyy") & "")
 
-                    intRepeat_Event_Reminder = Val(.Item("Repeat_Event_Reminder") & "")
-                    intSMS_Days_After = Val(.Item("SMS_Days_After") & "")
+                        intRepeat_Event_Reminder = Val(.Item("Repeat_Event_Reminder") & "")
+                        intSMS_Days_After = Val(.Item("SMS_Days_After") & "")
 
-                    strNext_SMS_On = .Item("Next_SMS_On") & ""
+                        strNext_SMS_On = .Item("Next_SMS_On") & ""
 
-                    'strMessage = strMessage & " Date : " & Format(.Item("Event_Date"), "dd/MM/yyyy") & ""
-                    'MsgBox(FormatDateTime(Now(), DateFormat.ShortDate) <= FormatDateTime(.Item("SMS_Date_Time"), DateFormat.ShortDate))
-                    If Mid(strEvent_Days, Weekday(Now(), FirstDayOfWeek.Monday), 1) = "1" And Val(.Item("Send_SMS") & "") = 1 And strMessage <> "" And Val(.Item("GO_SMS") & "") = 1 Then
+                        'strMessage = strMessage & " Date : " & Format(.Item("Event_Date"), "dd/MM/yyyy") & ""
+                        'MsgBox(FormatDateTime(Now(), DateFormat.ShortDate) <= FormatDateTime(.Item("SMS_Date_Time"), DateFormat.ShortDate))
+                        If Mid(strEvent_Days, Weekday(Now(), FirstDayOfWeek.Monday), 1) = "1" And Val(.Item("Send_SMS") & "") = 1 And strMessage <> "" And Val(.Item("GO_SMS") & "") = 1 Then
 
-                        Generate_Log("WhatsApp Sending for Event Id :" & lngEvent_Id & vbCrLf & "To Mobile No(s) : " & strMobile_No)
+                            Generate_Log("WhatsApp Sending for Event Id :" & lngEvent_Id & vbCrLf & "To Mobile No(s) : " & strMobile_No)
 
-                        strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
-                        adocommand = New SqlCommand(strSQL_String, adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
+                            strSQL_String = "EXEC master.dbo.sp_configure 'show advanced options', 1"
+                            Using cmd As New SqlCommand(strSQL_String, adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
 
-                        adocommand = New SqlCommand("RECONFIGURE", adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
+                            Using cmd As New SqlCommand("RECONFIGURE", adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
 
-                        strSQL_String = "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
-                        adocommand = New SqlCommand(strSQL_String, adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
+                            strSQL_String = "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
+                            Using cmd As New SqlCommand(strSQL_String, adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
 
-                        adocommand = New SqlCommand("RECONFIGURE", adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
+                            Using cmd As New SqlCommand("RECONFIGURE", adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
 
-                        adocommand = New SqlCommand("EXEC spOMS_Send_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', '1707166280617387783', 0", adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
-                    End If
+                            Using cmd As New SqlCommand("EXEC spOMS_Send_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "''")) & "', '1707166280617387783', 0", adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
+                        End If
 
-                    strSQL_String = ""
-                    If intRepeat_Event_Reminder = 1 Then
-                        'strSQL_String = "UPDATE tblEvent_Mast SET Next_SMS_On = DATEADD(ww,1,Next_SMS_On), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(ww,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(ww,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(ww,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(ww,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                    ElseIf intRepeat_Event_Reminder = 2 Then
-                        'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(mm,1,Event_Date), SMS_From_Date = DATEADD(mm,1,SMS_From_Date), SMS_Date_Time = DATEADD(mm,1,SMS_Date_Time), Next_SMS_On = DATEADD(mm,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(mm,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                    ElseIf intRepeat_Event_Reminder = 3 Then
-                        'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(qq,1,Event_Date), SMS_From_Date = DATEADD(qq,1,SMS_From_Date), SMS_Date_Time = DATEADD(qq,1,SMS_Date_Time), Next_SMS_On = DATEADD(qq,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(qq,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(qq,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(qq,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(qq,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                    ElseIf intRepeat_Event_Reminder = 4 Then
-                        'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(mm,6,Event_Date), SMS_From_Date = DATEADD(mm,6,SMS_From_Date), SMS_Date_Time = DATEADD(mm,6,SMS_Date_Time), Next_SMS_On = DATEADD(mm,6,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,6,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,6,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,6,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(mm,6,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                    ElseIf intRepeat_Event_Reminder = 5 Then
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(yyyy,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(yyyy,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(yyyy,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(yyyy,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                    ElseIf intRepeat_Event_Reminder = 6 Then
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(dd,After_Days,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(dd,After_Days,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(dd,After_Days,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(dd,After_Days,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                    Else
-                        strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Next_SMS_On = NULL, Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
-                    End If
-                    If strSQL_String <> "" Then
-                        adocommand = New SqlCommand(strSQL_String, adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
-                    End If
-                End With
-            Next
-        Catch ex1 As Exception
-            If connetionString = "" Then
-                Print_Error_Only("OMS Event SMS Send", ex1)
-            End If
-        End Try
-        adoSMS.Close()
-        adoSMS.Dispose()
+                        strSQL_String = ""
+                        If intRepeat_Event_Reminder = 1 Then
+                            'strSQL_String = "UPDATE tblEvent_Mast SET Next_SMS_On = DATEADD(ww,1,Next_SMS_On), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                            strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(ww,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(ww,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(ww,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(ww,1,SMS_From_Date) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        ElseIf intRepeat_Event_Reminder = 2 Then
+                            'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(mm,1,Event_Date), SMS_From_Date = DATEADD(mm,1,SMS_From_Date), SMS_Date_Time = DATEADD(mm,1,SMS_Date_Time), Next_SMS_On = DATEADD(mm,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                            strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(mm,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        ElseIf intRepeat_Event_Reminder = 3 Then
+                            'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(qq,1,Event_Date), SMS_From_Date = DATEADD(qq,1,SMS_From_Date), SMS_Date_Time = DATEADD(qq,1,SMS_Date_Time), Next_SMS_On = DATEADD(qq,1,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                            strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(qq,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(qq,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(qq,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(qq,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        ElseIf intRepeat_Event_Reminder = 4 Then
+                            'strSQL_String = "UPDATE tblEvent_Mast SET Event_Date = DATEADD(mm,6,Event_Date), SMS_From_Date = DATEADD(mm,6,SMS_From_Date), SMS_Date_Time = DATEADD(mm,6,SMS_Date_Time), Next_SMS_On = DATEADD(mm,6,SMS_From_Date), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                            strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,6,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,6,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(mm,6,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(mm,6,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        ElseIf intRepeat_Event_Reminder = 5 Then
+                            strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(yyyy,1,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(yyyy,1,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN  DATEADD(yyyy,1,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date or CAST(GETDATE() AS DATE)>=CAST(SMS_Date_Time AS DATE) THEN DATEADD(yyyy,1,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        ElseIf intRepeat_Event_Reminder = 6 Then
+                            strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Event_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Event_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(dd,After_Days,Event_Date) ELSE Event_Date END), SMS_From_Date = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_From_Date WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(dd,After_Days,SMS_From_Date) ELSE SMS_From_Date END), SMS_Date_Time = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN SMS_Date_Time WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN  DATEADD(dd,After_Days,SMS_Date_Time) ELSE SMS_Date_Time END), Next_SMS_On = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN Next_SMS_On WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN DATEADD(dd,After_Days,SMS_From_Date) WHEN Send_SMS = 1 AND CAST(GETDATE() AS DATE)>=CAST(DATEADD(dd,1,Next_SMS_On) AS DATE) THEN DATEADD(dd,1,GETDATE()) WHEN Send_SMS = 1 THEN DATEADD(dd,1,Next_SMS_On) ELSE Next_SMS_On END), Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        Else
+                            strSQL_String = "UPDATE tblEvent_Mast SET Send_SMS = (CASE WHEN Repeat_Option=1 AND Remainder_End_Date <= CAST(GETDATE() AS DATE) THEN 0 WHEN CAST(GETDATE() AS DATE)>=Event_Date THEN 1 ELSE Send_SMS END), Next_SMS_On = NULL, Entry_Date = GETDATE() WHERE Event_Id = " & lngEvent_Id
+                        End If
+                        If strSQL_String <> "" Then
+                            Using cmd As New SqlCommand(strSQL_String, adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
+                        End If
+                    End With
+                Next
+            Catch ex1 As Exception
+                If connetionString = "" Then
+                    Print_Error_Only("OMS Event SMS Send", ex1)
+                End If
+            End Try
+            adoRs_SMS.Dispose()
+        End Using
     End Function
 
     Private Sub Generate_Log(ByVal strProcedure As String)
@@ -1751,25 +1696,27 @@ Public Class OMS_Dongle
         End Try
     End Sub
 
-    Private Function Send_SMS_SP(ByVal strMobile_No As String, ByVal strMessage As String)
+    Private Function Send_SMS_SP(ByRef adoCon_Company As SqlConnection, ByVal strMobile_No As String, ByVal strMessage As String)
         Try
             strSQL_String = "BEGIN"
             strSQL_String = strSQL_String & vbCrLf & "EXEC master.dbo.sp_configure 'show advanced options', 1"
             strSQL_String = strSQL_String & vbCrLf & "EXEC master.dbo.sp_configure 'Ole Automation Procedures', 1"
             strSQL_String = strSQL_String & vbCrLf & "END"
 
-            Dim adocommand As New SqlCommand(strSQL_String, adoCon_Company)
-            adocommand.CommandTimeout = 0
-            adocommand.ExecuteNonQuery()
+            Using cmd As New SqlCommand(strSQL_String, adoCon_Company)
+                cmd.CommandTimeout = 0
+                cmd.ExecuteNonQuery()
+            End Using
 
-            adocommand = New SqlCommand("RECONFIGURE", adoCon_Company)
-            adocommand.CommandTimeout = 0
-            adocommand.ExecuteNonQuery()
-
+            Using cmd As New SqlCommand("RECONFIGURE", adoCon_Company)
+                cmd.CommandTimeout = 0
+                cmd.ExecuteNonQuery()
+            End Using
             'adocommand = New SqlCommand("EXEC spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "")) & "', '1707162946121274007', 1", adoCon_Company)
-            adocommand = New SqlCommand("EXEC spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "")) & "', 1", adoCon_Company)
-            adocommand.CommandTimeout = 0
-            adocommand.ExecuteNonQuery()
+            Using cmd As New SqlCommand("EXEC spSend_SMS '" & strMobile_No & "','" & URLencshort(Replace(Trim(strMessage), "'", "")) & "', 1", adoCon_Company)
+                cmd.CommandTimeout = 0
+                cmd.ExecuteNonQuery()
+            End Using
 
         Catch ex1 As Exception
             Print_Error_Only("Send_SMS_SP", ex1)
@@ -1795,101 +1742,61 @@ Public Class OMS_Dongle
 
     Private Sub Backup_Schedule(ByVal strSQL_Server_Instance_Name As String)
         connetionString = "Data Source=" & strSQL_Server_Instance_Name & ";Initial Catalog=OMSSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
-        adoCon_Company = New SqlConnection(connetionString)
-        Try
-            adoCon_Company.Open()
-            Dim strDataPath As String
-            Dim adapter As New SqlDataAdapter
-            Dim adoRS_Company As New DataSet
-            Dim adocommand As SqlCommand
-            Dim blnCentral_Backup As Boolean
-            Dim blnCompany_Backup As Boolean
+        Using adoCon_Company As New SqlConnection(connetionString)
+            Try
+                adoCon_Company.Open()
+                Dim strDataPath As String
+                Dim adapter As New SqlDataAdapter
+                Dim adoRS_Company As New DataSet
+                Dim blnCentral_Backup As Boolean
+                Dim blnCompany_Backup As Boolean
 
-            Dim strTempDataPath As String
-            Dim strCentral_Database As String
-            Dim strCompany_Database As String
+                Dim strTempDataPath As String
+                Dim strCentral_Database As String
+                Dim strCompany_Database As String
 
-            'adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) AND ISNULL(Next_Backup,GETDATE()-1) < GETDATE()) OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
-            adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE (ISNULL(Next_Backup,GETDATE()-1) < GETDATE() AND LEN(Financial_Year)=8) OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
-            adapter.Fill(adoRS_Company)
-            adapter.Dispose()
-            For i = 0 To adoRS_Company.Tables(0).Rows.Count - 1
-                With adoRS_Company.Tables(0).Rows(i)
-                    Try
-                        strDataPath = gstrOMS_Data_Backup_Path & "\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
-                        'strDataPath = "D:\Backup\AEL\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
+                'adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE (CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) AND ISNULL(Next_Backup,GETDATE()-1) < GETDATE()) OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
+                adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE (ISNULL(Next_Backup,GETDATE()-1) < GETDATE() AND LEN(Financial_Year)=8) OR Backup_Schedule = 1 ORDER BY Company_Id", adoCon_Company)
+                adapter.Fill(adoRS_Company)
+                adapter.Dispose()
+                For i = 0 To adoRS_Company.Tables(0).Rows.Count - 1
+                    With adoRS_Company.Tables(0).Rows(i)
+                        Try
+                            strDataPath = gstrOMS_Data_Backup_Path & "\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
+                            'strDataPath = "D:\Backup\AEL\" & UCase(WeekdayName(Weekday(Now(), vbMonday), True, vbMonday))
 
-                        gintAttachment = 0
-                        gstrPublication_Database = "OMSSoft-" & .Item("Company_Id") & "-" & .Item("Head_Office_Id") & "-" & .Item("Location_Id") & "-" & .Item("Financial_Year")
+                            gintAttachment = 0
+                            gstrPublication_Database = "OMSSoft-" & .Item("Company_Id") & "-" & .Item("Head_Office_Id") & "-" & .Item("Location_Id") & "-" & .Item("Financial_Year")
 
-                        glngFinancial_Year = .Item("Financial_Year")
+                            glngFinancial_Year = .Item("Financial_Year")
 
-                        gstrCompany_Id = .Item("Company_Id") & ""
-                        strCentral_Database = .Item("Central_Database") & ""
-                        strHead_Office_Id = .Item("Head_Office_Id") & ""
-                        strLocation_ID = .Item("Location_ID") & ""
-                        gstrCompany_Name = .Item("Company_Desc").ToString() & ""
+                            gstrCompany_Id = .Item("Company_Id") & ""
+                            strCentral_Database = .Item("Central_Database") & ""
+                            strHead_Office_Id = .Item("Head_Office_Id") & ""
+                            strLocation_ID = .Item("Location_ID") & ""
+                            gstrCompany_Name = .Item("Company_Desc").ToString() & ""
 
 
-                        If Not Directory.Exists(strDataPath) Then
-                            Directory.CreateDirectory(strDataPath)
-                        End If
-                        blnCentral_Backup = False
-                        If strCentral_Database <> "" Then
-                            If File.Exists(strDataPath & "\" & strCentral_Database & ".BAK") Then
-                                Dim objFile As FileInfo
+                            If Not Directory.Exists(strDataPath) Then
+                                Directory.CreateDirectory(strDataPath)
+                            End If
+                            blnCentral_Backup = False
+                            If strCentral_Database <> "" Then
+                                If File.Exists(strDataPath & "\" & strCentral_Database & ".BAK") Then
+                                    Dim objFile As FileInfo
 
-                                objFile = New FileInfo(strDataPath & "\" & strCentral_Database & ".BAK")
+                                    objFile = New FileInfo(strDataPath & "\" & strCentral_Database & ".BAK")
 
-                                If Math.Abs(DateDiff(DateInterval.Hour, Now(), objFile.CreationTime)) > 12 Then
-                                    objFile.Delete()
+                                    If Math.Abs(DateDiff(DateInterval.Hour, Now(), objFile.CreationTime)) > 12 Then
+                                        objFile.Delete()
+                                        blnCentral_Backup = True
+                                    End If
+                                Else
                                     blnCentral_Backup = True
                                 End If
-                            Else
-                                blnCentral_Backup = True
                             End If
-                        End If
-                        If blnCentral_Backup = True Then
-                            strBackup_File = strCentral_Database & ".BAK"
-
-                            strTempDataPath = My.Application.Info.DirectoryPath & "\Schedule_Backup"
-                            If Directory.Exists(strTempDataPath) Then
-                                Directory.Delete(strTempDataPath, True)
-                            End If
-                            Directory.CreateDirectory(strTempDataPath)
-
-                            command = New SqlCommand
-                            command.Connection = adoCon_Company
-                            command.CommandTimeout = 0
-                            command.CommandText = "BACKUP DATABASE [" & strCentral_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT"
-                            command.ExecuteNonQuery()
-
-                            outputZip = strDataPath & "\" & strBackup_File
-
-                            If File.Exists(outputZip) Then
-                                File.Delete(outputZip)
-                            End If
-                            inputFolder = strTempDataPath & "\" & strBackup_File
-                            If Zip() = True Then
-                                Directory.Delete(strTempDataPath, True)
-                            End If
-
-                            strCompany_Database = "OMSSoft_Company"
-                            blnCompany_Backup = False
-                            If File.Exists(strDataPath & "\" & strCompany_Database & ".BAK") Then
-                                Dim objFile_Com As FileInfo
-
-                                objFile_Com = New FileInfo(strDataPath & "\" & strCompany_Database & ".BAK")
-
-                                If Math.Abs(DateDiff(DateInterval.Hour, Now(), objFile_Com.CreationTime)) > 12 Then
-                                    objFile_Com.Delete()
-                                    blnCompany_Backup = True
-                                End If
-                            Else
-                                blnCompany_Backup = True
-                            End If
-                            If blnCompany_Backup = True Then
-                                strBackup_File = strCompany_Database & ".BAK"
+                            If blnCentral_Backup = True Then
+                                strBackup_File = strCentral_Database & ".BAK"
 
                                 strTempDataPath = My.Application.Info.DirectoryPath & "\Schedule_Backup"
                                 If Directory.Exists(strTempDataPath) Then
@@ -1897,11 +1804,10 @@ Public Class OMS_Dongle
                                 End If
                                 Directory.CreateDirectory(strTempDataPath)
 
-                                command = New SqlCommand
-                                command.Connection = adoCon_Company
-                                command.CommandTimeout = 0
-                                command.CommandText = "BACKUP DATABASE [" & strCompany_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT"
-                                command.ExecuteNonQuery()
+                                Using cmd As New SqlCommand("BACKUP DATABASE [" & strCentral_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT", adoCon_Company)
+                                    cmd.CommandTimeout = 0
+                                    cmd.ExecuteNonQuery()
+                                End Using
 
                                 outputZip = strDataPath & "\" & strBackup_File
 
@@ -1912,53 +1818,87 @@ Public Class OMS_Dongle
                                 If Zip() = True Then
                                     Directory.Delete(strTempDataPath, True)
                                 End If
+
+                                strCompany_Database = "OMSSoft_Company"
+                                blnCompany_Backup = False
+                                If File.Exists(strDataPath & "\" & strCompany_Database & ".BAK") Then
+                                    Dim objFile_Com As FileInfo
+
+                                    objFile_Com = New FileInfo(strDataPath & "\" & strCompany_Database & ".BAK")
+
+                                    If Math.Abs(DateDiff(DateInterval.Hour, Now(), objFile_Com.CreationTime)) > 12 Then
+                                        objFile_Com.Delete()
+                                        blnCompany_Backup = True
+                                    End If
+                                Else
+                                    blnCompany_Backup = True
+                                End If
+                                If blnCompany_Backup = True Then
+                                    strBackup_File = strCompany_Database & ".BAK"
+
+                                    strTempDataPath = My.Application.Info.DirectoryPath & "\Schedule_Backup"
+                                    If Directory.Exists(strTempDataPath) Then
+                                        Directory.Delete(strTempDataPath, True)
+                                    End If
+                                    Directory.CreateDirectory(strTempDataPath)
+
+                                    Using cmd As New SqlCommand("BACKUP DATABASE [" & strCompany_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT", adoCon_Company)
+                                        cmd.CommandTimeout = 0
+                                        cmd.ExecuteNonQuery()
+                                    End Using
+
+                                    outputZip = strDataPath & "\" & strBackup_File
+
+                                    If File.Exists(outputZip) Then
+                                        File.Delete(outputZip)
+                                    End If
+                                    inputFolder = strTempDataPath & "\" & strBackup_File
+                                    If Zip() = True Then
+                                        Directory.Delete(strTempDataPath, True)
+                                    End If
+                                End If
                             End If
-                        End If
-                        strBackup_File = gstrPublication_Database & ".BAK"
-                        strTempDataPath = My.Application.Info.DirectoryPath & "\Schedule_Backup"
-                        If Directory.Exists(strTempDataPath) Then
-                            Directory.Delete(strTempDataPath, True)
-                        End If
-                        Directory.CreateDirectory(strTempDataPath)
+                            strBackup_File = gstrPublication_Database & ".BAK"
+                            strTempDataPath = My.Application.Info.DirectoryPath & "\Schedule_Backup"
+                            If Directory.Exists(strTempDataPath) Then
+                                Directory.Delete(strTempDataPath, True)
+                            End If
+                            Directory.CreateDirectory(strTempDataPath)
 
-                        command = New SqlCommand
-                        command.Connection = adoCon_Company
-                        command.CommandTimeout = 0
-                        command.CommandText = "BACKUP DATABASE [" & gstrPublication_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT"
-                        command.ExecuteNonQuery()
+                            Using cmd As New SqlCommand("BACKUP DATABASE [" & gstrPublication_Database & "] TO DISK=N'" & strTempDataPath & "\" & strBackup_File & "' WITH INIT", adoCon_Company)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
+                            outputZip = strDataPath & "\" & gstrPublication_Database & "_" & Replace(gstrServer_IP_Address, ".", "-") & "_Full.BAK"
 
-                        outputZip = strDataPath & "\" & gstrPublication_Database & "_" & Replace(gstrServer_IP_Address, ".", "-") & "_Full.BAK"
+                            If File.Exists(outputZip) Then
+                                File.Delete(outputZip)
+                            End If
+                            inputFolder = strTempDataPath & "\" & strBackup_File
+                            If Zip() = True Then
+                                Directory.Delete(strTempDataPath, True)
+                                If gstrBackup_Schedule <> "" Then
+                                    strSQL_String = "UPDATE [OMSSoft_Company].DBO.tblCompany_Detail SET Backup_Schedule = 0, Next_Backup = CAST(CONVERT(VARCHAR,GETDATE()+1,23) + ' " & gstrBackup_Schedule & ":00' AS DATETIME) WHERE Company_Id = '" & gstrCompany_Id & "' AND Financial_Year = '" & glngFinancial_Year & "'"
+                                Else
+                                    strSQL_String = "UPDATE [OMSSoft_Company].DBO.tblCompany_Detail SET Backup_Schedule = 0, Next_Backup = CAST(CONVERT(VARCHAR,GETDATE()+1,23) + ' 21:00:00' AS DATETIME) WHERE Company_Id = '" & gstrCompany_Id & "' AND Financial_Year = '" & glngFinancial_Year & "'"
+                                End If
 
-                        If File.Exists(outputZip) Then
-                            File.Delete(outputZip)
-                        End If
-                        inputFolder = strTempDataPath & "\" & strBackup_File
-                        If Zip() = True Then
-                            Directory.Delete(strTempDataPath, True)
-                            command = New SqlCommand
-                            command.Connection = adoCon_Company
-                            command.CommandTimeout = 0
-                            If gstrBackup_Schedule <> "" Then
-                                command.CommandText = "UPDATE [OMSSoft_Company].DBO.tblCompany_Detail SET Backup_Schedule = 0, Next_Backup = CAST(CONVERT(VARCHAR,GETDATE()+1,23) + ' " & gstrBackup_Schedule & ":00' AS DATETIME) WHERE Company_Id = '" & gstrCompany_Id & "' AND Financial_Year = '" & glngFinancial_Year & "'"
-                            Else
-                                command.CommandText = "UPDATE [OMSSoft_Company].DBO.tblCompany_Detail SET Backup_Schedule = 0, Next_Backup = CAST(CONVERT(VARCHAR,GETDATE()+1,23) + ' 21:00:00' AS DATETIME) WHERE Company_Id = '" & gstrCompany_Id & "' AND Financial_Year = '" & glngFinancial_Year & "'"
+                                Using cmd As New SqlCommand(strSQL_String, adoCon_Company)
+                                    cmd.CommandTimeout = 0
+                                    cmd.ExecuteNonQuery()
+                                End Using
                             End If
 
-                            command.ExecuteNonQuery()
-                        End If
-
-                    Catch ex2 As Exception
-                        Print_Error_Only("Backup Schedule", ex2)
-                    End Try
-                End With
-            Next
-            'End If
-        Catch ex1 As Exception
-            Print_Error_Only("Backup_Schedule! ", ex1)
-        End Try
-
-        adoCon_Company.Close()
-        adoCon_Company.Dispose()
+                        Catch ex2 As Exception
+                            Print_Error_Only("Backup Schedule", ex2)
+                        End Try
+                    End With
+                Next
+                'End If
+            Catch ex1 As Exception
+                Print_Error_Only("Backup_Schedule! ", ex1)
+            End Try
+        End Using
     End Sub
 
     Private Function Zip() As Boolean
@@ -1989,145 +1929,145 @@ Public Class OMS_Dongle
 
     Private Sub Server_Schedule()
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=RetailSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
-        adoCon_Company = New SqlConnection(connetionString)
-        Try
-            adoCon_Company.Open()
-            Dim adapter As New SqlDataAdapter
-            Dim adoRS_Company As New DataSet
-            Dim adocommand As SqlCommand
-            Dim blnUpload_RSInfo As Boolean
+        Using adoCon_Company As New SqlConnection(connetionString)
+            Try
+                adoCon_Company.Open()
+                Dim adapter As New SqlDataAdapter
+                Dim adoRS_Company As New DataSet
+                Dim blnUpload_RSInfo As Boolean
 
-            adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE ISNULL(Subscriber,0) = 0 AND CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) AND (CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) BETWEEN CAST(CAST(LEFT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) AND CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT)) ORDER BY Company_Id", adoCon_Company)
-            adapter.Fill(adoRS_Company)
-            adapter.Dispose()
-            For i = 0 To adoRS_Company.Tables(0).Rows.Count - 1
-                With adoRS_Company.Tables(0).Rows(i)
-                    Try
-                        gintAttachment = 0
-                        gstrPublication_Database = "RetailSoft-" & .Item("Company_Id") & "-" & .Item("Head_Office_Id") & "-" & .Item("Location_Id") & "-" & .Item("Financial_Year")
+                adapter.SelectCommand = New SqlCommand("SELECT * FROM tblCompany_Detail WHERE ISNULL(Subscriber,0) = 0 AND CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) >= CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) AND (CAST(CONVERT(VARCHAR,GETDATE(),112) AS INT) BETWEEN CAST(CAST(LEFT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT) AND CAST(CAST(RIGHT(Financial_Year,4) AS VARCHAR(4))+'0401' AS INT)) ORDER BY Company_Id", adoCon_Company)
+                adapter.Fill(adoRS_Company)
+                adapter.Dispose()
+                For i = 0 To adoRS_Company.Tables(0).Rows.Count - 1
+                    With adoRS_Company.Tables(0).Rows(i)
+                        Try
+                            gintAttachment = 0
+                            gstrPublication_Database = "RetailSoft-" & .Item("Company_Id") & "-" & .Item("Head_Office_Id") & "-" & .Item("Location_Id") & "-" & .Item("Financial_Year")
 
-                        glngFinancial_Year = .Item("Financial_Year")
+                            glngFinancial_Year = .Item("Financial_Year")
 
-                        gstrCompany_Id = .Item("Company_Id") & ""
+                            gstrCompany_Id = .Item("Company_Id") & ""
 
-                        strHead_Office_Id = .Item("Head_Office_Id") & ""
-                        strLocation_ID = .Item("Location_ID") & ""
-                        gstrCompany_Name = .Item("Company_Desc").ToString() & ""
+                            strHead_Office_Id = .Item("Head_Office_Id") & ""
+                            strLocation_ID = .Item("Location_ID") & ""
+                            gstrCompany_Name = .Item("Company_Desc").ToString() & ""
 
-                        strHO_Company_Code = ""
-                        Get_HO_Company_Code()
-                        strExe_Version = ""
-                        Get_Location_Go_Live()
-                        blnUpload_RSInfo = False
+                            strHO_Company_Code = ""
+                            Get_HO_Company_Code()
+                            strExe_Version = ""
+                            Get_Location_Go_Live()
+                            blnUpload_RSInfo = False
 
-                        If Download_RSInfo("/RETAIL_SOFT/" & IIf(strHO_Company_Code <> gstrCompany_Id, strHO_Company_Code & "/" & gstrCompany_Id, gstrCompany_Id) & "/Download", gstrCompany_Id) = True Then
-                            blnUpload_RSInfo = True
-                        End If
-                        If Update_RSLog(gstrCompany_Id) = True Or blnUpload_RSInfo = True Then
-                            If Search_Lock() = True Then
-                                strSQL_String = "BEGIN"
-                                strSQL_String = strSQL_String & vbCrLf & "  DELETE FROM [RetailSoft_Company].DBO.tblRsInfo_Up WHERE Company_Id='" & gstrCompany_Id & "'"
-                                strSQL_String = strSQL_String & vbCrLf & "  INSERT INTO [RetailSoft_Company].DBO.tblRsInfo_Up(Company_Id, Exe_Date,Exe_Size,Exe_Version,IP_Address,Server_Name,Info,Company,HO,Branch,Server_info,Go_Live) "
-                                strSQL_String = strSQL_String & vbCrLf & "  SELECT TOP 1 '" & gstrCompany_Id & "', Exe_Date,REPLACE(Exe_Size,',',''),'" & strExe_Version & "',IP_Address,Server_Name,'" & Replace(Replace(gstrLicense_Information, "'", ""), ",", "") & "','" & gstrCompany_Id & " - " & Replace(Replace(gstrCompany_Name, "'", ""), ",", "") & "','" & RTrim(strHO_Desc) & "','" & RTrim(strBranch_Desc) & "','Server Info (" & gstrHasp_LockId & ") On Date : ' + CONVERT(VARCHAR,GETDATE(),103) + ' ' + CONVERT(VARCHAR,GETDATE(),108),'" & strOpening_Date & "' FROM [RetailSoft_Company].DBO.tblServer"
-                                strSQL_String = strSQL_String & vbCrLf & "END"
-
-                                adocommand = New SqlCommand(strSQL_String, adoCon_Company)
-                                adocommand.CommandTimeout = 0
-                                adocommand.ExecuteNonQuery()
+                            If Download_RSInfo(adoCon_Company, "/RETAIL_SOFT/" & IIf(strHO_Company_Code <> gstrCompany_Id, strHO_Company_Code & "/" & gstrCompany_Id, gstrCompany_Id) & "/Download", gstrCompany_Id) = True Then
+                                blnUpload_RSInfo = True
                             End If
-                        End If
+                            If Update_RSLog(adoCon_Company, gstrCompany_Id) = True Or blnUpload_RSInfo = True Then
+                                If Search_Lock() = True Then
+                                    strSQL_String = "BEGIN"
+                                    strSQL_String = strSQL_String & vbCrLf & "  DELETE FROM [RetailSoft_Company].DBO.tblRsInfo_Up WHERE Company_Id='" & gstrCompany_Id & "'"
+                                    strSQL_String = strSQL_String & vbCrLf & "  INSERT INTO [RetailSoft_Company].DBO.tblRsInfo_Up(Company_Id, Exe_Date,Exe_Size,Exe_Version,IP_Address,Server_Name,Info,Company,HO,Branch,Server_info,Go_Live) "
+                                    strSQL_String = strSQL_String & vbCrLf & "  SELECT TOP 1 '" & gstrCompany_Id & "', Exe_Date,REPLACE(Exe_Size,',',''),'" & strExe_Version & "',IP_Address,Server_Name,'" & Replace(Replace(gstrLicense_Information, "'", ""), ",", "") & "','" & gstrCompany_Id & " - " & Replace(Replace(gstrCompany_Name, "'", ""), ",", "") & "','" & RTrim(strHO_Desc) & "','" & RTrim(strBranch_Desc) & "','Server Info (" & gstrHasp_LockId & ") On Date : ' + CONVERT(VARCHAR,GETDATE(),103) + ' ' + CONVERT(VARCHAR,GETDATE(),108),'" & strOpening_Date & "' FROM [RetailSoft_Company].DBO.tblServer"
+                                    strSQL_String = strSQL_String & vbCrLf & "END"
 
-                        Upload_RSInfo("/RETAIL_SOFT/" & IIf(strHO_Company_Code <> gstrCompany_Id, strHO_Company_Code & "/" & gstrCompany_Id, gstrCompany_Id) & "/Upload", gstrCompany_Id)
+                                    Using cmd As New SqlCommand(strSQL_String, adoCon_Company)
+                                        cmd.CommandTimeout = 0
+                                        cmd.ExecuteNonQuery()
+                                    End Using
+                                End If
+                            End If
 
-                    Catch ex2 As Exception
-                        Print_Error_Only("Server Schedule", ex2)
-                    End Try
-                End With
-            Next
-            'End If
-        Catch ex1 As Exception
-            Print_Error_Only("Server_Schedule! ", ex1)
-        End Try
+                            Upload_RSInfo(adoCon_Company, "/RETAIL_SOFT/" & IIf(strHO_Company_Code <> gstrCompany_Id, strHO_Company_Code & "/" & gstrCompany_Id, gstrCompany_Id) & "/Upload", gstrCompany_Id)
 
-        adoCon_Company.Close()
-        adoCon_Company.Dispose()
+                        Catch ex2 As Exception
+                            Print_Error_Only("Server Schedule", ex2)
+                        End Try
+                    End With
+                Next
+                'End If
+            Catch ex1 As Exception
+                Print_Error_Only("Server_Schedule! ", ex1)
+            End Try
+        End Using
+
     End Sub
 
     Private Function Get_Location_Go_Live() As Boolean
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=" & gstrPublication_Database & ";User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
-        Dim adoCon_Stock As New SqlConnection(connetionString)
-        Try
+        Using adoCon_Stock As New SqlConnection(connetionString)
+            Dim adoRs_Stock As New DataSet
+            Try
+                adoCon_Stock.Open()
+                Dim adapter As SqlDataAdapter
 
-            adoCon_Stock.Open()
 
-            Dim adapter As New SqlDataAdapter
-            Dim adoRs_Stock As DataSet
+                strSQL_String = "Select Branch_Id, Branch_Desc, Opening_Date FROM tblBranch_Mast WHERE Branch_Id='" & strLocation_ID & "'"
 
-            strSQL_String = "Select Branch_Id, Branch_Desc, Opening_Date FROM tblBranch_Mast WHERE Branch_Id='" & strLocation_ID & "'"
+                Using command As New SqlCommand(strSQL_String, adoCon_Stock)
+                    command.CommandTimeout = 0
+                    adapter = New SqlDataAdapter
+                    adapter.SelectCommand = command
 
-            command = New SqlCommand(strSQL_String, adoCon_Stock)
-            command.CommandTimeout = 0
-            adapter = New SqlDataAdapter
-            adapter.SelectCommand = command
-            adoRs_Stock = New DataSet
-            adapter.Fill(adoRs_Stock)
-            adapter.Dispose()
-            adapter = Nothing
-            command.Dispose()
-            If adoRs_Stock.Tables(0).Rows.Count > 0 Then
-                With adoRs_Stock.Tables(0).Rows(0)
-                    strBranch_Desc = CStr(.Item("Branch_Id") & "") & " - " & Replace(Replace(CStr(.Item("Branch_Desc") & ""), "'", ""), ",", "")
-                    If IsDate(.Item("Opening_Date") & "") = True Then
-                        If CDate(.Item("Opening_Date")) > CDate("01/Apr/1990") Then
-                            strOpening_Date = Format(.Item("Opening_Date"), "dd/MMM/yyyy")
+                    adapter.Fill(adoRs_Stock)
+                    adapter.Dispose()
+                    adapter = Nothing
+                End Using
+                If adoRs_Stock.Tables(0).Rows.Count > 0 Then
+                    With adoRs_Stock.Tables(0).Rows(0)
+                        strBranch_Desc = CStr(.Item("Branch_Id") & "") & " - " & Replace(Replace(CStr(.Item("Branch_Desc") & ""), "'", ""), ",", "")
+                        If IsDate(.Item("Opening_Date") & "") = True Then
+                            If CDate(.Item("Opening_Date")) > CDate("01/Apr/1990") Then
+                                strOpening_Date = Format(.Item("Opening_Date"), "dd/MMM/yyyy")
+                            End If
                         End If
-                    End If
 
-                    Dim strRetail_Soft_File = My.Application.Info.DirectoryPath & "\Retail_Soft.exe"
-                    Dim myFileVersionInfo As FileVersionInfo
-                    If File.Exists(strRetail_Soft_File) Then
-                        myFileVersionInfo = FileVersionInfo.GetVersionInfo(strRetail_Soft_File)
-                        strExe_Version = (myFileVersionInfo.FileVersion.Split(" ")(0)).ToString
-                    End If
-                End With
-            End If
-        Catch ex1 As Exception
-            Print_Error_Only("Get Location Go Live", ex1)
-        End Try
-        adoCon_Stock.Close()
-        adoCon_Stock.Dispose()
+                        Dim strRetail_Soft_File = My.Application.Info.DirectoryPath & "\Retail_Soft.exe"
+                        Dim myFileVersionInfo As FileVersionInfo
+                        If File.Exists(strRetail_Soft_File) Then
+                            myFileVersionInfo = FileVersionInfo.GetVersionInfo(strRetail_Soft_File)
+                            strExe_Version = (myFileVersionInfo.FileVersion.Split(" ")(0)).ToString
+                        End If
+                    End With
+                End If
+                adoRs_Stock.Dispose()
+            Catch ex1 As Exception
+                Print_Error_Only("Get Location Go Live", ex1)
+            End Try
+            adoRs_Stock.Dispose()
+        End Using
     End Function
 
     Private Function Get_HO_Company_Code() As Boolean
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=" & gstrPublication_Database & ";User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
-        Dim adoCon_Stock As New SqlConnection(connetionString)
-        Try
-            adoCon_Stock.Open()
-            Dim adapter As New SqlDataAdapter
-            Dim adoRs_Stock As DataSet
+        Using adoCon_Stock As New SqlConnection(connetionString)
+            Dim adoRs_Stock As New DataSet
+            Try
+                adoCon_Stock.Open()
+                Dim adapter As New SqlDataAdapter
 
-            strSQL_String = "Select Company_Id, Branch_Id, Branch_Desc FROM tblBranch_Mast WHERE Branch_Id='" & strHead_Office_Id & "'"
+                strSQL_String = "Select Company_Id, Branch_Id, Branch_Desc FROM tblBranch_Mast WHERE Branch_Id='" & strHead_Office_Id & "'"
 
-            command = New SqlCommand(strSQL_String, adoCon_Stock)
-            command.CommandTimeout = 0
-            adapter = New SqlDataAdapter
-            adapter.SelectCommand = command
-            adoRs_Stock = New DataSet
-            adapter.Fill(adoRs_Stock)
-            adapter.Dispose()
-            adapter = Nothing
-            command.Dispose()
-            If adoRs_Stock.Tables(0).Rows.Count > 0 Then
-                With adoRs_Stock.Tables(0).Rows(0)
-                    strHO_Company_Code = CStr(.Item("Company_Id") & "")
-                    strHO_Desc = CStr(.Item("Branch_Id") & "") & " - " & Replace(Replace(CStr(.Item("Branch_Desc") & ""), "'", ""), ",", "")
-                End With
-            End If
-        Catch ex1 As Exception
-            Print_Error_Only("Get HO Company Code", ex1)
-        End Try
-        adoCon_Stock.Close()
-        adoCon_Stock.Dispose()
+                Using command As New SqlCommand(strSQL_String, adoCon_Stock)
+                    command.CommandTimeout = 0
+                    adapter = New SqlDataAdapter
+                    adapter.SelectCommand = command
+
+                    adapter.Fill(adoRs_Stock)
+                    adapter.Dispose()
+                    adapter = Nothing
+                End Using
+                If adoRs_Stock.Tables(0).Rows.Count > 0 Then
+                    With adoRs_Stock.Tables(0).Rows(0)
+                        strHO_Company_Code = CStr(.Item("Company_Id") & "")
+                        strHO_Desc = CStr(.Item("Branch_Id") & "") & " - " & Replace(Replace(CStr(.Item("Branch_Desc") & ""), "'", ""), ",", "")
+                    End With
+                End If
+                adoRs_Stock.Dispose()
+            Catch ex1 As Exception
+                Print_Error_Only("Get HO Company Code", ex1)
+            End Try
+            adoRs_Stock.Dispose()
+        End Using
     End Function
 
     Private Sub Refresh_Server_Data()
@@ -2180,265 +2120,264 @@ Public Class OMS_Dongle
 
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=" & strCentral_Database & ";User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
 
-        Dim adoWhatsUp As New SqlConnection(connetionString)
-        Try
-            adoWhatsUp.Open()
-
-            connetionString = ""
-
-            strLeave_Application_Ids = "''"
-
-            Dim adapter As New SqlDataAdapter
+        Using adoWhatsUp As New SqlConnection(connetionString)
             Dim adoRs_WhatsUp As New DataSet
-            Dim strWhatsUP_Msg As String
+            Try
+                adoWhatsUp.Open()
+
+                connetionString = ""
+
+                strLeave_Application_Ids = "''"
+
+                Dim adapter As New SqlDataAdapter
+                Dim strWhatsUP_Msg As String
 
 
-            strWhatsUP_Msg = "Remainder : "
-            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*Approval is pending for following Leave Application*"
-            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Employee Name :"
+                strWhatsUP_Msg = "Reminder : "
+                strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*Approval is pending for following Leave Application*"
+                strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Employee Name :"
 
-            strSQL_String = "SELECT LAP.Leave_Application_Id, USR.User_Desc, LAP.Leave_From, LAP.Leave_To, LAP.Leave_Reason from [" & strCompany_Database & "].dbo.tblLeave_Application LAP"
-            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblUser_Mast USR ON USR.User_Id = LAP.Employee_Id "
-            strSQL_String = strSQL_String & vbCrLf & "WHERE DATEDIFF(DAY,GETDATE(),Leave_From) < 5 AND DATEDIFF(DAY,GETDATE(),Leave_From)>0 AND Leave_Approved = 0 AND ((Last_Msg_Send IS NULL OR CAST(Last_Msg_Send AS DATE)<>CAST(GETDATE() AS DATE)) AND CONVERT(varchar,getdate(),14) > '11:00:00')"
+                strSQL_String = "SELECT LAP.Leave_Application_Id, USR.User_Desc, LAP.Leave_From, LAP.Leave_To, LAP.Leave_Reason from [" & strCompany_Database & "].dbo.tblLeave_Application LAP"
+                strSQL_String = strSQL_String & vbCrLf & "INNER JOIN tblUser_Mast USR ON USR.User_Id = LAP.Employee_Id "
+                strSQL_String = strSQL_String & vbCrLf & "WHERE DATEDIFF(DAY,GETDATE(),Leave_From) < 5 AND DATEDIFF(DAY,GETDATE(),Leave_From)>0 AND Leave_Approved = 0 AND ((Last_Msg_Send IS NULL OR CAST(Last_Msg_Send AS DATE)<>CAST(GETDATE() AS DATE)) AND CONVERT(varchar,getdate(),14) > '11:00:00')"
 
-            adapter.SelectCommand = New SqlCommand(strSQL_String, adoWhatsUp)
-            adapter.Fill(adoRs_WhatsUp)
-            adapter.Dispose()
-            For i = 0 To adoRs_WhatsUp.Tables(0).Rows.Count - 1
-                With adoRs_WhatsUp.Tables(0).Rows(i)
+                adapter.SelectCommand = New SqlCommand(strSQL_String, adoWhatsUp)
+                adapter.Fill(adoRs_WhatsUp)
+                adapter.Dispose()
+                For i = 0 To adoRs_WhatsUp.Tables(0).Rows.Count - 1
+                    With adoRs_WhatsUp.Tables(0).Rows(i)
 
-                    strLeave_Application_Ids = strLeave_Application_Ids & ",'" & Trim(.Item("Leave_Application_Id")) & "'"
+                        strLeave_Application_Ids = strLeave_Application_Ids & ",'" & Trim(.Item("Leave_Application_Id")) & "'"
 
-                    'strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & .Item("User_Desc") & Space(40 - Len(.Item("User_Desc"))) & " - " & .Item("Leave_From")
+                        'strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & .Item("User_Desc") & Space(40 - Len(.Item("User_Desc"))) & " - " & .Item("Leave_From")
 
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & Trim(.Item("User_Desc")) & "*"
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Leave Period"
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & Trim(.Item("User_Desc")) & "*"
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Leave Period"
 
-                    If DateDiff(DateInterval.Day, CDate(.Item("Leave_From")), CDate(.Item("Leave_To")), FirstDayOfWeek.Monday) >= 1 Then
-                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & .Item("Leave_From") & " - " & .Item("Leave_To") & " ( " & DateDiff(DateInterval.Day, CDate(.Item("Leave_From")), CDate(.Item("Leave_To")), FirstDayOfWeek.Monday) + 1 & " Days )*"
-                    Else
-                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & .Item("Leave_From") & " - " & .Item("Leave_To") & " ( " & 1 & " Day )*"
-                    End If
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Reason :"
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & Trim(.Item("Leave_Reason")) & "*"
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Sent From IP Address :"
-                    strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & strGetLocalIPv4 & "*"
+                        If DateDiff(DateInterval.Day, CDate(.Item("Leave_From")), CDate(.Item("Leave_To")), FirstDayOfWeek.Monday) >= 1 Then
+                            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & .Item("Leave_From") & " - " & .Item("Leave_To") & " ( " & DateDiff(DateInterval.Day, CDate(.Item("Leave_From")), CDate(.Item("Leave_To")), FirstDayOfWeek.Monday) + 1 & " Days )*"
+                        Else
+                            strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & .Item("Leave_From") & " - " & .Item("Leave_To") & " ( " & 1 & " Day )*"
+                        End If
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Reason :"
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & Trim(.Item("Leave_Reason")) & "*"
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & vbCrLf & "Sent From IP Address :"
+                        strWhatsUP_Msg = strWhatsUP_Msg & vbCrLf & "*" & strGetLocalIPv4 & "*"
 
-                End With
-            Next
-            Send_WhatsUp2 = strWhatsUP_Msg
-        Catch ex1 As Exception
-            Print_Error_Only("Restore_RSInfo", ex1)
-            Send_WhatsUp2 = ""
-            strLeave_Application_Ids = ""
-        End Try
+                    End With
+                Next
+                Send_WhatsUp2 = strWhatsUP_Msg
+            Catch ex1 As Exception
+                Print_Error_Only("Restore_RSInfo", ex1)
+                Send_WhatsUp2 = ""
+                strLeave_Application_Ids = ""
+            End Try
+            adoRs_WhatsUp.Dispose()
+        End Using
     End Function
 
     Private Sub Send_Email_To_Client()
-        Dim adocommand As SqlCommand
-        Dim Email_Adapter As SqlDataAdapter
         Dim adoRS_Setup As DataSet
-        Dim strEntry_Date As String
         Dim strNew_String As String
-        Dim strLog_Type As String
         Dim strUpdate_String As String = ""
         Dim strSubject As String = ""
         Dim strMessge_Body As String
 
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Company;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
 
-        Dim adoSMS As New SqlConnection(connetionString)
-        Dim bytAttachment As Byte()
-        Dim FS As FileStream = Nothing
-        Dim data As Net.Mail.Attachment
-        Try
-            adoSMS.Open()
-            strMessge_Body = ""
-
-            strSQL_String = "SELECT * FROM [OMSSoft_Company].dbo.tblSend_Email"
-            strSQL_String = strSQL_String & vbCrLf & "ORDER BY EMail_Id"
-
+        Using adoSMS As New SqlConnection(connetionString)
+            Dim bytAttachment As Byte()
+            Dim FS As FileStream = Nothing
+            Dim data As Net.Mail.Attachment
             adoRS_Setup = New DataSet
+            Try
+                adoSMS.Open()
+                strMessge_Body = ""
 
-            Email_Adapter = New SqlDataAdapter
-            Email_Adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
-            Email_Adapter.Fill(adoRS_Setup)
-            Email_Adapter.Dispose()
-            strNew_String = ""
-            For i = 0 To adoRS_Setup.Tables(0).Rows.Count - 1
-                With adoRS_Setup.Tables(0).Rows(i)
-                    strMessge_Body = .Item("Message").ToString()
-                    If strMessge_Body <> "" Then
-                        'Create_RS_Inbound_Client_Log("Invoice Setup Change", "", 0)
-                        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-                        'System.Net.ServicePointManager.SecurityProtocol = CType(3072, SecurityProtocolType)
-                        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-                        Dim SmtpServer As New SmtpClient()
-                        Dim mail As New MailMessage()
-                        SmtpServer.UseDefaultCredentials = False
-                        SmtpServer.EnableSsl = True
-                        'SmtpServer.Credentials = New Net.NetworkCredential("nitinborkar.ysipl@gmail.com", "dyjr abdf obca uvai")
-                        SmtpServer.Credentials = New Net.NetworkCredential("yashsystems.ngp@gmail.com", "nuzfmaznyhfwccyj")  'ngzpggvvyvssqijy
-                        SmtpServer.Port = 587
-                        SmtpServer.Host = "smtp.gmail.com"
-                        mail = New MailMessage()
+                strSQL_String = "SELECT * FROM [OMSSoft_Company].dbo.tblSend_Email"
+                strSQL_String = strSQL_String & vbCrLf & "ORDER BY EMail_Id"
 
-                        mail.From = New MailAddress("yashsystems.ngp@gmail.com")
+                Using Email_Adapter As New SqlDataAdapter
+                    Email_Adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
+                    Email_Adapter.Fill(adoRS_Setup)
+                End Using
+                strNew_String = ""
+                For i = 0 To adoRS_Setup.Tables(0).Rows.Count - 1
+                    With adoRS_Setup.Tables(0).Rows(i)
+                        strMessge_Body = .Item("Message").ToString()
+                        If strMessge_Body <> "" Then
+                            'Create_RS_Inbound_Client_Log("Invoice Setup Change", "", 0)
+                            'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+                            'System.Net.ServicePointManager.SecurityProtocol = CType(3072, SecurityProtocolType)
+                            'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+                            Dim SmtpServer As New SmtpClient()
+                            Dim mail As New MailMessage()
+                            SmtpServer.UseDefaultCredentials = False
+                            SmtpServer.EnableSsl = True
+                            'SmtpServer.Credentials = New Net.NetworkCredential("nitinborkar.ysipl@gmail.com", "dyjr abdf obca uvai")
+                            SmtpServer.Credentials = New Net.NetworkCredential("yashsystems.ngp@gmail.com", "nuzfmaznyhfwccyj")  'ngzpggvvyvssqijy
+                            SmtpServer.Port = 587
+                            SmtpServer.Host = "smtp.gmail.com"
+                            mail = New MailMessage()
 
-                        'mail.To.Add("nitinborkar642599@gmail.com")
-                        mail.To.Add(.Item("Email").ToString())
+                            mail.From = New MailAddress("yashsystems.ngp@gmail.com")
 
-                        mail.Bcc.Add("nilesh.ysipl@gmail.com,nitinborkar642599@gmail.com")
-                        'mail.CC.Add("manish.ysipl@gmail.com,sahoo.ysipl@gmail.com,sanjay.ysipl@gmail.com,abhinav.ysipl@gmail.com")
+                            'mail.To.Add("nitinborkar642599@gmail.com")
+                            mail.To.Add(.Item("Email").ToString())
 
-                        mail.Subject = .Item("Subject").ToString()
+                            mail.Bcc.Add("nilesh.ysipl@gmail.com,nitinborkar642599@gmail.com")
+                            'mail.CC.Add("manish.ysipl@gmail.com,sahoo.ysipl@gmail.com,sanjay.ysipl@gmail.com,abhinav.ysipl@gmail.com")
 
-                        Dim filepath As String = My.Application.Info.DirectoryPath & "\temp_" & Guid.NewGuid().ToString("N") & ".xls"
-                        If IsDBNull(.Item("Attachment")) = False Then
-                            bytAttachment = .Item("Attachment")
-                            If File.Exists(filepath) Then
-                                FileSystem.Kill(filepath)
+                            mail.Subject = .Item("Subject").ToString()
+
+                            Dim filepath As String = My.Application.Info.DirectoryPath & "\temp_" & Guid.NewGuid().ToString("N") & ".xls"
+                            If IsDBNull(.Item("Attachment")) = False Then
+                                bytAttachment = .Item("Attachment")
+                                If File.Exists(filepath) Then
+                                    FileSystem.Kill(filepath)
+                                End If
+                                'Assign File path create file
+                                FS = New FileStream(filepath, System.IO.FileMode.Create)
+                                'Write bytes to create file
+                                FS.Write(bytAttachment, 0, bytAttachment.Length)
+                                'Close FileStream instance
+                                FS.Close()
+                                FS = Nothing
+
+                                data = New Net.Mail.Attachment(filepath)
+                                data.Name = .Item("File_Name").ToString()
+                                mail.Attachments.Add(data)
+
                             End If
-                            'Assign File path create file
-                            FS = New FileStream(filepath, System.IO.FileMode.Create)
-                            'Write bytes to create file
-                            FS.Write(bytAttachment, 0, bytAttachment.Length)
-                            'Close FileStream instance
-                            FS.Close()
-                            FS = Nothing
+                            mail.IsBodyHtml = False
+                            mail.Body = strMessge_Body
+                            'ServicePointManager.ServerCertificateValidationCallback = New System.Net.Security.RemoteCertificateValidationCallback(AddressOf customCertValidation)
+                            'SmtpServer.Timeout = 500000
+                            SmtpServer.Send(mail)
 
-                            data = New Net.Mail.Attachment(filepath)
-                            data.Name = .Item("File_Name").ToString()
-                            mail.Attachments.Add(data)
+                            Using cmd As New SqlCommand("DELETE FROM [OMSSoft_Company].dbo.tblSend_Email WHERE EMail_Id = " & .Item("Email_Id").ToString() & "", adoSMS)
+                                cmd.CommandTimeout = 0
+                                cmd.ExecuteNonQuery()
+                            End Using
 
+                            'Create_RS_Inbound_Client_Log("Invoice Setup Change", "", 1)
+
+                            SmtpServer = Nothing
+                            mail = Nothing
+
+                            data.Dispose()
+                            data = Nothing
+                            File.Delete(filepath)
                         End If
-                        mail.IsBodyHtml = False
-                        mail.Body = strMessge_Body
-                        'ServicePointManager.ServerCertificateValidationCallback = New System.Net.Security.RemoteCertificateValidationCallback(AddressOf customCertValidation)
-                        'SmtpServer.Timeout = 500000
-                        SmtpServer.Send(mail)
-
-                        adocommand = New SqlCommand("DELETE FROM [OMSSoft_Company].dbo.tblSend_Email WHERE EMail_Id = " & .Item("Email_Id").ToString() & "", adoSMS)
-                        adocommand.CommandTimeout = 0
-                        adocommand.ExecuteNonQuery()
-
-                        'Create_RS_Inbound_Client_Log("Invoice Setup Change", "", 1)
-
-                        SmtpServer = Nothing
-                        mail = Nothing
-
-                        data.Dispose()
-                        data = Nothing
-                        File.Delete(filepath)
-                    End If
-                End With
-            Next
-
-            adoRS_Setup = Nothing
-            Email_Adapter = Nothing
-
-        Catch ex As Exception
-            Print_Error_Only("Invoice Setup Change", ex)
-        End Try
+                    End With
+                Next
+            Catch ex As Exception
+                Print_Error_Only("Send Email To Client", ex)
+            End Try
+            adoRS_Setup.Dispose()
+        End Using
     End Sub
 
     Private Function Restore_RSInfo() As Boolean
         '''TS-103 | System should Read Ctrl+F4 information available on FTP Upload folder and update the same in OMS data for that client site.
         connetionString = "Data Source=" & gstrSQL_Server_Instance_Name & gstrSQL_Server_Port & ";Initial Catalog=OMSSoft_Central_YSIPL;User ID=" & gstrSQL_Instance_User_Name & ";Password=clsxls@login123;Application Name=Client_YSI"
 
-        Dim adoRestore As New SqlConnection(connetionString)
-        Try
-            adoRestore.Open()
-
-            connetionString = ""
-
-            Dim adapter As New SqlDataAdapter
+        Using adoRestore As New SqlConnection(connetionString)
             Dim adoRs_Restore As New DataSet
-            Dim strCompanies As String
+            Try
+                adoRestore.Open()
 
-            strCompanies = ""
+                connetionString = ""
 
-            FTP_Folder_List("59.90.32.112", "FTP_User1", "Timken123#", True, "\Retail_Soft", strCompanies)
-            If strCompanies <> "" Then
-                strSQL_String = "SELECT Site_Id FROM tblClient_Site_Detail WHERE Site_Id IN (" & strCompanies & ") ORDER BY Site_Id"
+                Dim adapter As New SqlDataAdapter
 
-                adapter.SelectCommand = New SqlCommand(strSQL_String, adoRestore)
-                adapter.Fill(adoRs_Restore)
-                adapter.Dispose()
-                For i = 0 To adoRs_Restore.Tables(0).Rows.Count - 1
-                    With adoRs_Restore.Tables(0).Rows(i)
-                        Dim strConsume_Folder As String
-                        Dim strCurrentFile As String
-                        Dim strSetup_Path As String
-                        Dim strSite_Id As String
-                        Dim strHO_Site() As String
-                        Dim intUB As Integer
+                Dim strCompanies As String
 
-                        strSite_Id = .Item("Site_Id")
+                strCompanies = ""
 
-                        FTP_Folder_List("59.90.32.112", "FTP_User1", "Timken123#", True, "\Retail_Soft\" & strSite_Id, strCompanies)
+                FTP_Folder_List("59.90.32.112", "FTP_User1", "Timken123#", True, "\Retail_Soft", strCompanies)
+                If strCompanies <> "" Then
+                    strSQL_String = "SELECT Site_Id FROM tblClient_Site_Detail WHERE Site_Id IN (" & strCompanies & ") ORDER BY Site_Id"
 
-                        If strCompanies <> "" Then
-                            strHO_Site = Split(Replace(strCompanies, "'", ""), ",")
-                            intUB = UBound(strHO_Site)
-                        End If
+                    adapter.SelectCommand = New SqlCommand(strSQL_String, adoRestore)
+                    adapter.Fill(adoRs_Restore)
+                    adapter.Dispose()
+                    For i = 0 To adoRs_Restore.Tables(0).Rows.Count - 1
+                        With adoRs_Restore.Tables(0).Rows(i)
+                            Dim strConsume_Folder As String
+                            Dim strCurrentFile As String
+                            Dim strSetup_Path As String
+                            Dim strSite_Id As String
+                            Dim strHO_Site() As String
+                            Dim intUB As Integer
 
+                            strSite_Id = .Item("Site_Id")
 
-                        strSetup_Path = "\Retail_Soft\" & strSite_Id & "\Upload"
+                            FTP_Folder_List("59.90.32.112", "FTP_User1", "Timken123#", True, "\Retail_Soft\" & strSite_Id, strCompanies)
+
+                            If strCompanies <> "" Then
+                                strHO_Site = Split(Replace(strCompanies, "'", ""), ",")
+                                intUB = UBound(strHO_Site)
+                            End If
+
+                            strSetup_Path = "\Retail_Soft\" & strSite_Id & "\Upload"
 HO_Site_Again:
-                        Dirlist = New List(Of String) 'I prefer List() instead of an array
-                        FTP_Folder_Files_List("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path, Dirlist)
-                        If Dirlist.Count > 0 Then
-                            strConsume_Folder = My.Application.Info.DirectoryPath & "\Log_Files"
-                            Create_Folder_Or_Delete_Old_Files(strConsume_Folder)
+                            Dirlist = New List(Of String) 'I prefer List() instead of an array
+                            FTP_Folder_Files_List("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path, Dirlist)
+                            If Dirlist.Count > 0 Then
+                                strConsume_Folder = My.Application.Info.DirectoryPath & "\Log_Files"
+                                Create_Folder_Or_Delete_Old_Files(strConsume_Folder)
 
-                            For intx = 0 To (Dirlist.Count - 1)
-                                strCurrentFile = Dirlist.Item(intx)
-                                strCurrentFile = Mid(strCurrentFile, InStr(strCurrentFile, "/", CompareMethod.Text) + 1, Len(strCurrentFile))
-                                If InStr(UCase(strCurrentFile), UCase("Restore_RSInfo_"), CompareMethod.Text) > 0 And InStr(UCase(strCurrentFile), UCase(".CSV"), CompareMethod.Text) > 0 Then
-                                    If File.Exists(strConsume_Folder & "/" & strCurrentFile) Then
-                                        File.Delete(strConsume_Folder & "/" & strCurrentFile)
-                                    End If
-                                    If Get_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile, strConsume_Folder & "/" & strCurrentFile) = True Then
-                                        If Import_CSV_File(adoRestore, strConsume_Folder & "/" & strCurrentFile, "Restore_RSInfo") = True Then
-                                            If Execute_Multiple_Query(adoRestore, 1) = False Then
-                                                If Execute_Multiple_Query(adoRestore, 2) = False Then
+                                For intx = 0 To (Dirlist.Count - 1)
+                                    strCurrentFile = Dirlist.Item(intx)
+                                    strCurrentFile = Mid(strCurrentFile, InStr(strCurrentFile, "/", CompareMethod.Text) + 1, Len(strCurrentFile))
+                                    If InStr(UCase(strCurrentFile), UCase("Restore_RSInfo_"), CompareMethod.Text) > 0 And InStr(UCase(strCurrentFile), UCase(".CSV"), CompareMethod.Text) > 0 Then
+                                        If File.Exists(strConsume_Folder & "/" & strCurrentFile) Then
+                                            File.Delete(strConsume_Folder & "/" & strCurrentFile)
+                                        End If
+                                        If Get_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile, strConsume_Folder & "/" & strCurrentFile) = True Then
+                                            If Import_CSV_File(adoRestore, strConsume_Folder & "/" & strCurrentFile, "Restore_RSInfo") = True Then
+                                                If Execute_Multiple_Query(adoRestore, 1) = False Then
+                                                    If Execute_Multiple_Query(adoRestore, 2) = False Then
+                                                    Else
+                                                        Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
+                                                    End If
                                                 Else
                                                     Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
                                                 End If
-                                            Else
-                                                Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
-                                            End If
-                                            'TS-186 | System should NOT update the Client Site Master's Information received from Ctrl+F4 String for D-Mart ASL, AFPL & AEL clients.
-                                            strSQL_String = "BEGIN"
-                                            strSQL_String = strSQL_String & vbCrLf & "SET DATEFORMAT DMY"
-                                            strSQL_String = strSQL_String & vbCrLf & "UPDATE CSD SET CSD.Exe_Date  = RSI.Exe_Date, CSD.Date_of_Opening = (CASE WHEN ISDATE(RSI.Go_Live)=1 THEN RSI.Go_Live ELSE CSD.Date_of_Opening END), From_Period = LEFT(RSI.Info, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 3, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 5, 4), To_Period = SUBSTRING(RSI.Info, 9, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 11, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 13, 4)"
-                                            strSQL_String = strSQL_String & vbCrLf & "FROM tblClient_Site_Detail CSD"
-                                            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN Restore_RSInfo RSI ON RSI.Company_Id = CSD.Site_Id"
-                                            strSQL_String = strSQL_String & vbCrLf & "WHERE CSD.Party_Id IN (SELECT Account_Id FROM tblAccount_Mast WHERE ISNULL(Client_Type,0)=0)"
-                                            strSQL_String = strSQL_String & vbCrLf & "END"
+                                                'TS-186 | System should NOT update the Client Site Master's Information received from Ctrl+F4 String for D-Mart ASL, AFPL & AEL clients.
+                                                strSQL_String = "BEGIN"
+                                                strSQL_String = strSQL_String & vbCrLf & "SET DATEFORMAT DMY"
+                                                strSQL_String = strSQL_String & vbCrLf & "UPDATE CSD SET CSD.Exe_Date  = RSI.Exe_Date, CSD.Date_of_Opening = (CASE WHEN ISDATE(RSI.Go_Live)=1 THEN RSI.Go_Live ELSE CSD.Date_of_Opening END), From_Period = LEFT(RSI.Info, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 3, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 5, 4), To_Period = SUBSTRING(RSI.Info, 9, 2) + '/' + LEFT(DATENAME(MONTH,DATEADD(MONTH,CAST(SUBSTRING(RSI.Info, 11, 2) AS INT),-1)),3) + '/' + SUBSTRING(RSI.Info, 13, 4)"
+                                                strSQL_String = strSQL_String & vbCrLf & "FROM tblClient_Site_Detail CSD"
+                                                strSQL_String = strSQL_String & vbCrLf & "INNER JOIN Restore_RSInfo RSI ON RSI.Company_Id = CSD.Site_Id"
+                                                strSQL_String = strSQL_String & vbCrLf & "WHERE CSD.Party_Id IN (SELECT Account_Id FROM tblAccount_Mast WHERE ISNULL(Client_Type,0)=0)"
+                                                strSQL_String = strSQL_String & vbCrLf & "END"
 
-                                            command = New SqlCommand(strSQL_String, adoRestore)
-                                            command.CommandTimeout = 0
-                                            command.ExecuteNonQuery()
+                                                Using cmd As New SqlCommand(strSQL_String, adoRestore)
+                                                    cmd.CommandTimeout = 0
+                                                    cmd.ExecuteNonQuery()
+                                                End Using
+                                            End If
                                         End If
+                                    Else
+                                        Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
                                     End If
-                                Else
-                                    Drop_FTP_File("59.90.32.112", "FTP_User1", "Timken123#", True, strSetup_Path & "/" & strCurrentFile)
-                                End If
-                            Next
-                        End If
-                        If strCompanies <> "" And intUB >= 0 Then
-                            strSetup_Path = "\Retail_Soft\" & strSite_Id & "\" & strHO_Site(intUB).ToString() & "\Upload"
-                            intUB = intUB - 1
-                            GoTo HO_Site_Again
-                        End If
-                    End With
-                Next
-            End If
-        Catch ex1 As Exception
-            Print_Error_Only("Restore_RSInfo", ex1)
-        End Try
+                                Next
+                            End If
+                            If strCompanies <> "" And intUB >= 0 Then
+                                strSetup_Path = "\Retail_Soft\" & strSite_Id & "\" & strHO_Site(intUB).ToString() & "\Upload"
+                                intUB = intUB - 1
+                                GoTo HO_Site_Again
+                            End If
+                        End With
+                    Next
+                End If
+            Catch ex1 As Exception
+                Print_Error_Only("Restore_RSInfo", ex1)
+            End Try
+            adoRs_Restore.Dispose()
+        End Using
     End Function
 
     Private Function Execute_Multiple_Query(ByRef adoRestore As SqlConnection, ByVal intFlag As Integer) As Boolean
@@ -2459,9 +2398,10 @@ HO_Site_Again:
 
             strSQL_String = strSQL_String & vbCrLf & "End"
 
-            command = New SqlCommand(strSQL_String, adoRestore)
-            command.CommandTimeout = 0
-            command.ExecuteNonQuery()
+            Using cmd As New SqlCommand(strSQL_String, adoRestore)
+                cmd.CommandTimeout = 0
+                cmd.ExecuteNonQuery()
+            End Using
 
             Update_Installation_Keys(adoRestore)
             Execute_Multiple_Query = True
@@ -2477,15 +2417,14 @@ HO_Site_Again:
             Dim strCompany_Id As String
             strSQL_String = "SELECT Company_Id, Info FROM Restore_RSInfo"
 
-            command = New SqlCommand(strSQL_String, adoRestore)
-            command.CommandTimeout = 0
-            adapter = New SqlDataAdapter
-            adapter.SelectCommand = command
             adoRs_Stock = New DataSet
-            adapter.Fill(adoRs_Stock)
-            adapter.Dispose()
-            adapter = Nothing
-            command.Dispose()
+            Using command As New SqlCommand(strSQL_String, adoRestore)
+                command.CommandTimeout = 0
+                Using adapter As New SqlDataAdapter
+                    adapter.SelectCommand = command
+                    adapter.Fill(adoRs_Stock)
+                End Using
+            End Using
             If adoRs_Stock.Tables(0).Rows.Count > 0 Then
                 With adoRs_Stock.Tables(0).Rows(0)
                     strLicense_Information = CStr(.Item("Info") & "")
@@ -2493,12 +2432,13 @@ HO_Site_Again:
 
                     strSQL_String = "UPDATE tblRsInfo_Up SET Install_Demo_Version = " & Val(Trim(Mid(strLicense_Information, 17, 1))) & ",Install_Print_Footer = " & Val(Trim(Mid(strLicense_Information, 17, 1))) & ",Install_Version = '" & Trim(Mid(strLicense_Information, 38, 36)) & "',Install_No_of_Company = " & Val(Trim(Mid(strLicense_Information, 18, 3))) & ",Install_POS_Lic = " & Val(Trim(Mid(strLicense_Information, 29, 3))) - Val(Trim(Mid(strLicense_Information, 32, 3))) & ",Install_BO_Lic=" & Val(Trim(Mid(strLicense_Information, 32, 3))) & ",Install_MPOS_Lic=" & Val(Trim(Mid(strLicense_Information, 89, 3))) & ",Install_Phy_Stk_User=" & Val(Trim(Mid(strLicense_Information, 79, 2))) & ",Install_HH_Phy_Stk_User=" & Val(Trim(Mid(strLicense_Information, 35, 3))) & ",Install_Offline_POS_Lic=" & Val(Trim(Mid(strLicense_Information, 86, 3))) & ",Install_Offline_Phy_Stk_User=" & Val(Trim(Mid(strLicense_Information, 83, 2))) & ",SAP_Setup_Type='" & Mid(strLicense_Information, 85, 1) & "',Historical_Data=" & Val(Trim(Mid(strLicense_Information, 81, 1))) & ",Android_Stock_Take=" & Val(Trim(Mid(strLicense_Information, 82, 1))) & " WHERE Company_Id = '" & strCompany_Id & "'"
 
-                    command = New SqlCommand(strSQL_String, adoRestore)
-                    command.CommandTimeout = 0
-                    command.ExecuteNonQuery()
+                    Using cmd As New SqlCommand(strSQL_String, adoRestore)
+                        cmd.CommandTimeout = 0
+                        cmd.ExecuteNonQuery()
+                    End Using
                 End With
             End If
-
+            adoRs_Stock.Dispose()
             Update_Installation_Keys = True
         Catch ex1 As Exception
             Update_Installation_Keys = False

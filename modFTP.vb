@@ -74,6 +74,9 @@ Module modFTP
         'connect to the FTP server
         hConnection = InternetConnect(hOpen, strFTP_Address, INTERNET_DEFAULT_FTP_PORT, strFTP_User_Name, strFTP_User_Password, INTERNET_SERVICE_FTP, IIf(PassiveConnection, INTERNET_FLAG_PASSIVE, 0), 0)
         If hConnection = 0 Then
+            If hOpen <> 0 Then
+                InternetCloseHandle(hOpen)
+            End If
             Get_FTP_File = False
             Exit Function
         End If
@@ -95,6 +98,9 @@ Module modFTP
         'connect to the FTP server
         hConnection = InternetConnect(hOpen, strFTP_Address, INTERNET_DEFAULT_FTP_PORT, strFTP_User_Name, strFTP_User_Password, INTERNET_SERVICE_FTP, IIf(PassiveConnection, INTERNET_FLAG_PASSIVE, 0), 0)
         If hConnection = 0 Then
+            If hOpen <> 0 Then
+                InternetCloseHandle(hOpen)
+            End If
             Drop_FTP_File = False
             Exit Function
         End If
@@ -120,6 +126,9 @@ Module modFTP
         'connect to the FTP server
         hConnection = InternetConnect(hOpen, strFTP_Address, INTERNET_DEFAULT_FTP_PORT, strFTP_User_Name, strFTP_User_Password, INTERNET_SERVICE_FTP, IIf(PassiveConnection, INTERNET_FLAG_PASSIVE, 0), 0)
         If hConnection = 0 Then
+            If hOpen <> 0 Then
+                InternetCloseHandle(hOpen)
+            End If
             Put_FTP_Files = False
             Exit Function
         End If
@@ -139,6 +148,9 @@ Module modFTP
         'upload the file 'test.htm'
         strFile_Name = Retrive_File_Name(strFile_Path)
         If FtpPutFile(hConnection, strFile_Path, strFile_Name, FTP_TRANSFER_TYPE_UNKNOWN, 0) = False Then
+            If hConnection <> 0 Then InternetCloseHandle(hConnection)
+            If hOpen <> 0 Then InternetCloseHandle(hOpen)
+
             Put_FTP_Files = False
             Exit Function
         End If
@@ -166,78 +178,8 @@ Module modFTP
         End If
     End Function
 
-    Public Function Remove_FTP_Folder(ByVal strFTP_Address As String, ByVal strFTP_User_Name As String, ByVal strFTP_User_Password As String, ByVal PassiveConnection As Boolean, ByVal strFTP_Folder As String) As Boolean
-        'Remove_Files_From_Folder(strFTP_Address, strFTP_User_Name, strFTP_User_Password, strFTP_Folder)
-        Dim hConnection, hOpen As Integer
-        Dim sOrgPath As String
-
-        'open an internet connection
-        hOpen = InternetOpen("API-Guide sample program", INTERNET_OPEN_TYPE_PRECONFIG, vbNullString, vbNullString, 0)
-        'connect to the FTP server
-        hConnection = InternetConnect(hOpen, strFTP_Address, INTERNET_DEFAULT_FTP_PORT, strFTP_User_Name, strFTP_User_Password, INTERNET_SERVICE_FTP, IIf(PassiveConnection, INTERNET_FLAG_PASSIVE, 0), 0)
-        If hConnection = 0 Then
-            Remove_FTP_Folder = False
-            Exit Function
-        End If
-        'create a buffer to store the original directory
-        sOrgPath = New String(Chr(0), MAX_PATH)
-        'get the directory
-        FtpGetCurrentDirectory(hConnection, sOrgPath, Len(sOrgPath))
-        If FtpRemoveDirectory(hConnection, strFTP_Folder) = False Then
-            'MsgBox(GetServerResponse())
-        End If
-        'close the FTP connection
-        InternetCloseHandle(hConnection)
-        'close the internet connection
-        InternetCloseHandle(hOpen)
-        Remove_FTP_Folder = True
-    End Function
-
-    Public Function Remove_Files_From_Folder(ByVal strFTP_Address As String, ByVal strFTP_User_Name As String, ByVal strFTP_User_Password As String, ByVal PassiveConnection As Boolean, ByVal strFTP_Folder As String) As Boolean
-        Dim WFD As WIN32_FIND_DATA
-        Dim tmp As String
-        Dim hConnection, hOpen As Integer
-        Dim sOrgPath As String
-        Dim hFind As Long
-
-        'open an internet connection
-        hOpen = InternetOpen("API-Guide sample program", INTERNET_OPEN_TYPE_PRECONFIG, vbNullString, vbNullString, 0)
-        'connect to the FTP server
-        hConnection = InternetConnect(hOpen, strFTP_Address, INTERNET_DEFAULT_FTP_PORT, strFTP_User_Name, strFTP_User_Password, INTERNET_SERVICE_FTP, IIf(PassiveConnection, INTERNET_FLAG_PASSIVE, 0), 0)
-        If hConnection = 0 Then
-            Remove_Files_From_Folder = False
-            Exit Function
-        End If
-        'create a buffer to store the original directory
-        sOrgPath = New String(Chr(0), MAX_PATH)
-        'get the directory
-        FtpGetCurrentDirectory(hConnection, sOrgPath, Len(sOrgPath))
-        'set the current directory to 'root/testing'
-        FtpSetCurrentDirectory(hConnection, strFTP_Folder)
-        FtpGetCurrentDirectory(hConnection, sOrgPath, Len(sOrgPath))
-
-        hFind = FtpFindFirstFile(hConnection, sOrgPath, WFD, INTERNET_FLAG_RELOAD Or INTERNET_FLAG_NO_CACHE_WRITE, 0&)
-        If hFind Then
-            Do
-                tmp = StripNull(WFD.cFileName)
-                If Len(tmp) Then
-                    If WFD.dwFileAttributes And vbDirectory Then
-                    Else
-                        FtpDeleteFile(hConnection, tmp)
-                    End If
-                End If
-                'continue while valid
-            Loop While InternetFindNextFile(hFind, WFD)
-        End If 'If hFind
-        'close the FTP connection
-        InternetCloseHandle(hConnection)
-        'close the internet connection
-        InternetCloseHandle(hOpen)
-        Remove_Files_From_Folder = True
-    End Function
-
     Public Function FTP_Folder_Files_List(ByVal strFTP_Address As String, ByVal strFTP_User_Name As String, ByVal strFTP_User_Password As String, ByVal PassiveConnection As Boolean, ByVal strFTP_Folder As String, ByRef Dirlist As List(Of String)) As Boolean
-        Dim WFD As WIN32_FIND_DATA
+        Dim WFD As New WIN32_FIND_DATA
         Dim tmp As String
         Dim hConnection, hOpen As Integer
         Dim sOrgPath As String
@@ -248,6 +190,9 @@ Module modFTP
         'connect to the FTP server
         hConnection = InternetConnect(hOpen, strFTP_Address, INTERNET_DEFAULT_FTP_PORT, strFTP_User_Name, strFTP_User_Password, INTERNET_SERVICE_FTP, IIf(PassiveConnection, INTERNET_FLAG_PASSIVE, 0), 0)
         If hConnection = 0 Then
+            If hOpen <> 0 Then
+                InternetCloseHandle(hOpen)
+            End If
             FTP_Folder_Files_List = False
             Exit Function
         End If
@@ -261,16 +206,20 @@ Module modFTP
 
         hFind = FtpFindFirstFile(hConnection, sOrgPath, WFD, INTERNET_FLAG_RELOAD Or INTERNET_FLAG_NO_CACHE_WRITE, 0&)
         If hFind Then
-            Do
-                tmp = StripNull(WFD.cFileName)
-                If Len(tmp) Then
-                    If WFD.dwFileAttributes And vbDirectory Then
-                    Else
-                        Dirlist.Add(tmp)
+            Try
+                Do
+                    tmp = StripNull(WFD.cFileName)
+                    If Len(tmp) Then
+                        If WFD.dwFileAttributes And vbDirectory Then
+                        Else
+                            Dirlist.Add(tmp)
+                        End If
                     End If
-                End If
-                'continue while valid
-            Loop While InternetFindNextFile(hFind, WFD)
+                    'continue while valid
+                Loop While InternetFindNextFile(hFind, WFD)
+            Finally
+                InternetCloseHandle(hFind)
+            End Try
         End If 'If hFind
         'close the FTP connection
         InternetCloseHandle(hConnection)
@@ -280,7 +229,7 @@ Module modFTP
     End Function
 
     Public Function FTP_Folder_List(ByVal strFTP_Address As String, ByVal strFTP_User_Name As String, ByVal strFTP_User_Password As String, ByVal PassiveConnection As Boolean, ByVal strFTP_Folder As String, ByRef strCompanies As String) As Boolean
-        Dim WFD As WIN32_FIND_DATA
+        Dim WFD As New WIN32_FIND_DATA
         Dim tmp As String
         Dim hConnection, hOpen As Integer
         Dim sOrgPath As String
@@ -291,6 +240,9 @@ Module modFTP
         'connect to the FTP server
         hConnection = InternetConnect(hOpen, strFTP_Address, INTERNET_DEFAULT_FTP_PORT, strFTP_User_Name, strFTP_User_Password, INTERNET_SERVICE_FTP, IIf(PassiveConnection, INTERNET_FLAG_PASSIVE, 0), 0)
         If hConnection = 0 Then
+            If hOpen <> 0 Then
+                InternetCloseHandle(hOpen)
+            End If
             FTP_Folder_List = False
             Exit Function
         End If
@@ -304,19 +256,23 @@ Module modFTP
         strCompanies = ""
         hFind = FtpFindFirstFile(hConnection, sOrgPath, WFD, INTERNET_FLAG_RELOAD Or INTERNET_FLAG_NO_CACHE_WRITE, 0&)
         If hFind Then
-            Do
-                tmp = StripNull(WFD.cFileName)
-                If Len(tmp) = 4 Then
-                    If WFD.dwFileAttributes And vbDirectory Then
-                        If strCompanies = "" Then
-                            strCompanies = "'" & tmp & "'"
-                        Else
-                            strCompanies = strCompanies & ",'" & tmp & "'"
+            Try
+                Do
+                    tmp = StripNull(WFD.cFileName)
+                    If Len(tmp) = 4 Then
+                        If WFD.dwFileAttributes And vbDirectory Then
+                            If strCompanies = "" Then
+                                strCompanies = "'" & tmp & "'"
+                            Else
+                                strCompanies = strCompanies & ",'" & tmp & "'"
+                            End If
                         End If
                     End If
-                End If
-                'continue while valid
-            Loop While InternetFindNextFile(hFind, WFD)
+                    'continue while valid
+                Loop While InternetFindNextFile(hFind, WFD)
+            Finally
+                InternetCloseHandle(hFind)
+            End Try
         End If 'If hFind
         'close the FTP connection
         InternetCloseHandle(hConnection)
