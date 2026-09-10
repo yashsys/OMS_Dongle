@@ -1539,6 +1539,13 @@ Public Class OMS_Dongle
                 Dim strEvent_Days As String
                 Dim lngEvent_Id As Long
                 Dim intSMS_Days_After As Integer
+                Dim strYSI_Database As String
+                Dim strYSIPL_Database As String
+                glngFinancial_Year = IIf(Today.Month >= 4, Today.Year, Today.Year - 1)
+                glngFinancial_Year = glngFinancial_Year & CStr(glngFinancial_Year + 1)
+
+                strYSIPL_Database = "OMSSoft-YSIC-001-001-" & glngFinancial_Year
+                strYSI_Database = "OMSSoft-Y003-001-001-" & glngFinancial_Year
 
                 'strSQL_String = "SELECT * FROM tblEvent_Mast WHERE (Send_SMS=1 OR CAST(GETDATE() AS DATE)>Event_Date) AND GETDATE() > Next_SMS_On AND (Repeat_Option=0 OR Remainder_End_Date >= CAST(GETDATE() AS DATE))"
 
@@ -1549,9 +1556,8 @@ Public Class OMS_Dongle
                 strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM1 ON MEM1.Member_Id = EVN.SMS1_Member_Id"
                 strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM2 ON MEM2.Member_Id = EVN.SMS2_Member_Id"
                 strSQL_String = strSQL_String & vbCrLf & "Left OUTER JOIN tblMember_Mast MEM3 ON MEM3.Member_Id = EVN.SMS3_Member_Id"
-                strSQL_String = strSQL_String & vbCrLf & "WHERE EVN.Event_Id IN (97,98)"
-                'strSQL_String = strSQL_String & vbCrLf & "WHERE (EVN.Send_SMS=1 OR CAST(GETDATE() AS DATE)>EVN.Event_Date) AND GETDATE() > EVN.Next_SMS_On AND (EVN.Repeat_Option=0 OR EVN.Remainder_End_Date >= CAST(GETDATE() AS DATE))"
-                'strSQL_String = strSQL_String & vbCrLf & "AND CAST(GETDATE() AS TIME)>=CAST(SMS_From_Date AS TIME)"
+                strSQL_String = strSQL_String & vbCrLf & "WHERE (EVN.Send_SMS=1 OR CAST(GETDATE() AS DATE)>EVN.Event_Date) AND GETDATE() > EVN.Next_SMS_On AND (EVN.Repeat_Option=0 OR EVN.Remainder_End_Date >= CAST(GETDATE() AS DATE))"
+                strSQL_String = strSQL_String & vbCrLf & "AND CAST(GETDATE() AS TIME)>=CAST(SMS_From_Date AS TIME)"
 
                 Using adapter As New SqlDataAdapter
                     adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
@@ -1559,6 +1565,7 @@ Public Class OMS_Dongle
                 End Using
                 For i = 0 To adoRs_SMS.Tables(0).Rows.Count - 1
                     With adoRs_SMS.Tables(0).Rows(i)
+
                         lngEvent_Id = Val(.Item("Event_Id"))
                         strEvent_Days = Trim(.Item("Event_Days") & "")
                         strMobile_No = Trim(.Item("Event_Member_Mobile_No") & "")
@@ -1594,66 +1601,73 @@ Public Class OMS_Dongle
                         End If
 
                         strMessage = Replace(strMessage, "<Event Head>", .Item("Event_Head_Desc") & "")
-                        strMessage = Replace(strMessage, "<Event Date>", Format(.Item("Event_Date"), "dd/MM/yyyy") & "")
+                        strMessage = Replace(strMessage, "<Event Date>", Format(.Item("Event_Date"), "dd\/MM\/yyyy") & "")
 
                         strMessage = Replace(strMessage, "<MMM>", MonthName(Month(Date.Today.ToString()), True) & "")
                         strMessage = Replace(strMessage, "<PMMM>", MonthName(Month(Date.Today.ToString()) - 1, True) & "")
                         strMessage = Replace(strMessage, "<DD>", Right("0" & Day(Date.Today.ToString()), 2) & "")
                         strMessage = Replace(strMessage, "<MM>", Right("0" & Month(Date.Today.ToString()), 2) & "")
                         strMessage = Replace(strMessage, "<PMM>", Right("0" & (Month(Date.Today.ToString()) - 1), 2) & "")
+
+                        strMessage = Replace(strMessage, "<PYY>", Right((Year(Date.Today.ToString()) - 1), 2) & "")
+                        strMessage = Replace(strMessage, "<PYYYY>", Right((Year(Date.Today.ToString()) - 1), 4) & "")
+
                         strMessage = Replace(strMessage, "<YY>", Right(Year(Date.Today.ToString()), 2) & "")
                         strMessage = Replace(strMessage, "<YYYY>", Year(Date.Today.ToString()) & "")
                         strMessage = Replace(strMessage, "<CFY>", Left(glngFinancial_Year, 4) & "-" & Right(glngFinancial_Year, 2) & "")
                         strMessage = Replace(strMessage, "<PFY>", Left(glngFinancial_Year - 1, 4) & "-" & Right(Left(glngFinancial_Year, 4), 2) & "")
-                        If InStr(strMessage, "<YSI TDS 1002>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSI TDS 1002>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSIPL TDS 1002>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSIPL TDS 1002>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSI TDS 1027>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSI TDS 1027>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSIPL TDS 1027>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSIPL TDS 1027>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSI TDS 1009>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSI TDS 1009>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSIPL TDS 1009>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSIPL TDS 1009>", Year(Date.Today.ToString()) & "")
+
+                        If InStr(strMessage, "<YSIPL TDS 1023>", CompareMethod.Text) > 0 Then
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSIPL_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSIPL TDS 1023>", strYSIPL_Database, Month(Now()) - 1)
+                            End If
                         End If
                         If InStr(strMessage, "<YSI TDS 1023>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSI TDS 1023>", Year(Date.Today.ToString()) & "")
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSI_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSI TDS 1023>", strYSI_Database, Month(Now()) - 1)
+                            End If
                         End If
-                        If InStr(strMessage, "<YSIPL TDS 1023>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSIPL TDS 1023>", Year(Date.Today.ToString()) & "")
+                        If InStr(strMessage, "<YSIPL TDS 1009>", CompareMethod.Text) > 0 Then
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSIPL_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSIPL TDS 1009>", strYSIPL_Database, Month(Now()) - 1)
+                            End If
+                        End If
+                        If InStr(strMessage, "<YSI TDS 1009>", CompareMethod.Text) > 0 Then
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSI_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSI TDS 1009>", strYSI_Database, Month(Now()) - 1)
+                            End If
+                        End If
+                        If InStr(strMessage, "<YSIPL TDS 1027>", CompareMethod.Text) > 0 Then
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSIPL_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSIPL TDS 1027>", strYSIPL_Database, Month(Now()) - 1)
+                            End If
+                        End If
+                        If InStr(strMessage, "<YSI TDS 1027>", CompareMethod.Text) > 0 Then
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSI_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSI TDS 1027>", "OMSSoft-Y003-001-001-20262027", Month(Now()) - 1)
+                            End If
+                        End If
+                        If InStr(strMessage, "<YSIPL TDS 1002>", CompareMethod.Text) > 0 Then
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSIPL_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSIPL TDS 1002>", strYSIPL_Database, Month(Now()) - 1)
+                            End If
+                        End If
+                        If InStr(strMessage, "<YSI TDS 1002>", CompareMethod.Text) > 0 Then
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSI_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSI TDS 1002>", strYSI_Database, Month(Now()) - 1)
+                            End If
                         End If
                         If InStr(strMessage, "<YSIPL IGST>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSIPL IGST>", Year(Date.Today.ToString()) & "")
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSIPL_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSIPL IGST>", strYSIPL_Database, Month(Now()) - 1)
+                            End If
                         End If
-                        If InStr(strMessage, "<YSIPL CGST>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSIPL CGST>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSIPL SGST>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSIPL SGST>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSIPL NET GST>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSIPL NET GST>", Year(Date.Today.ToString()) & "")
+                        If InStr(strMessage, "<YSI IGST>", CompareMethod.Text) > 0 Then
+                            If CInt(ExecuteScalarValue(adoSMS, "SELECT COUNT(NAME) FROM [MASTER].SYS.SYSDATABASES WHERE NAME ='" & strYSI_Database & "'")) > 0 Then
+                                Retrive_Tag_Detail(adoSMS, strMessage, "<YSI IGST>", strYSI_Database, Month(Now()) - 1)
+                            End If
                         End If
 
-                        If InStr(strMessage, "<YSI IGST>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSI IGST>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSI CGST>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSI CGST>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSI SGST>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSI SGST>", Year(Date.Today.ToString()) & "")
-                        End If
-                        If InStr(strMessage, "<YSI NET GST>", CompareMethod.Text) > 0 Then
-                            strMessage = Replace(strMessage, "<YSI NET GST>", Year(Date.Today.ToString()) & "")
-                        End If
                         intRepeat_Event_Reminder = Val(.Item("Repeat_Event_Reminder") & "")
                         intSMS_Days_After = Val(.Item("SMS_Days_After") & "")
 
@@ -1730,55 +1744,383 @@ Public Class OMS_Dongle
         End Using
     End Function
 
-    Private Function Retrive_Tag_Detail(ByVal strTAG As String) As String
-        If strTAG = "<YSI TDS 1002>" Then
-            strMessage = Replace(strMessage, "<YSI TDS 1002>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSIPL TDS 1002>" Then
-            strMessage = Replace(strMessage, "<YSIPL TDS 1002>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSI TDS 1027>" Then
-            strMessage = Replace(strMessage, "<YSI TDS 1027>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSIPL TDS 1027>" Then
-            strMessage = Replace(strMessage, "<YSIPL TDS 1027>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSI TDS 1009>" Then
-            strMessage = Replace(strMessage, "<YSI TDS 1009>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSIPL TDS 1009>" Then
-            strMessage = Replace(strMessage, "<YSIPL TDS 1009>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSI TDS 1023>" Then
-            strMessage = Replace(strMessage, "<YSI TDS 1023>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSIPL TDS 1023>" Then
-            strMessage = Replace(strMessage, "<YSIPL TDS 1023>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSIPL IGST>" Then
-            strMessage = Replace(strMessage, "<YSIPL IGST>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSIPL CGST>" Then
-            strMessage = Replace(strMessage, "<YSIPL CGST>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSIPL SGST>" Then
-            strMessage = Replace(strMessage, "<YSIPL SGST>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSIPL NET GST>" Then
-            strMessage = Replace(strMessage, "<YSIPL NET GST>", Year(Date.Today.ToString()) & "")
-        End If
+    Private Function Retrive_Tag_Detail(ByVal adoSMS As SqlConnection, ByRef strMessage As String, ByVal strTAG As String, ByVal gstrFYDatabaseName As String, ByVal intGST_Month As Integer) As String
 
-        If strTAG = "<YSI IGST>" Then
-            strMessage = Replace(strMessage, "<YSI IGST>", Year(Date.Today.ToString()) & "")
+        If strTAG = "<YSIPL IGST>" Or strTAG = "<YSI IGST>" Then
+            strSQL_String = "SELECT ISNULL(SUM(ISNULL(SAL.Sal_Gross_Amount,0) - ISNULL(SAL.Pur_Gross_Amount,0)),0) As Gross_Amount, ISNULL(SUM(ISNULL(SAL.Sal_IGST_Value,0) - ISNULL(SAL.Pur_IGST_Value,0)),0) As IGST_Value, ISNULL(SUM(ISNULL(SAL.Sal_CGST_Value,0) - ISNULL(SAL.Pur_CGST_Value,0)),0) As CGST_Value, ISNULL(SUM(ISNULL(SAL.Sal_SGST_Value,0) - ISNULL(SAL.Pur_SGST_Value,0)),0) As SGST_Value, ISNULL(SUM(ISNULL(SAL.Sal_Gst_Amount,0) - ISNULL(SAL.Pur_Gst_Amount,0)),0) As Total_Gst_Amount, ISNULL(SUM(ISNULL(SAL.Sal_Net_Amount,0) - ISNULL(SAL.Pur_Net_Amount,0)),0) As Net_Invoice_Amount "
+            strSQL_String = strSQL_String & vbCrLf & "FROM("
+            strSQL_String = strSQL_String & vbCrLf & "SELECT INDX_WORD = 'C1', GROUP_CALC = 'C', Voucher_Type = 'TOT', GROUP_WORD = 'C', DATEPART(MONTH,SD.Invoice_Date) AS Month_No, DATENAME(MONTH,SD.Invoice_Date) As Month_Name, DATEPART(YEAR,SD.Invoice_Date) AS Year_Name, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM((CASE WHEN SD.Voucher_Type = 'JV' THEN (SD.Net_Invoice_Amount - (SD.IGST_Value + SD.CGST_Value + SD.SGST_Value + SD.CESS_Value)) ELSE SD.Total_Installation_Cost END)) As Sal_Gross_Amount, 0 Pur_Gross_Amount, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(SD.IGST_Value) As Sal_IGST_Value, 0 Pur_IGST_Value, SUM(SD.CGST_Value) As Sal_CGST_Value, 0 Pur_CGST_Value, SUM(SD.SGST_Value) As Sal_SGST_Value, 0 Pur_SGST_Value, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM((SD.IGST_Value + SD.CGST_Value + SD.SGST_Value + SD.CESS_Value)) As Sal_Gst_Amount, 0 Pur_Gst_Amount, SUM(SD.Net_Invoice_Amount) As Sal_Net_Amount, 0 Pur_Net_Amount "
+            strSQL_String = strSQL_String & vbCrLf & "FROM ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT ROW_NUMBER()OVER(ORDER BY SD.Invoice_No) AS Sr_No, SD.Party_Desc, SD.City, SD.Site_State_Cd, SD.State_Desc, SD.Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "SD.Party_Id, SD.Invoice_Date, SD.Invoice_No, SD.Total_Installation_Cost, SD.GST_Amount, SD.Net_Invoice_Amount, SD.IGST_Value, SD.CGST_Value, SD.SGST_Value, SD.CESS_Value, SD.SGST_Percentage, SD.CGST_Percentage, SD.IGST_Percentage, SD.CESS_Percentage, SD.Voucher_Type, IsNull(ACM.SAC_Code,'') As SAC_Code"
+            strSQL_String = strSQL_String & vbCrLf & "FROM ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(SD.Party_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, IsNull(CSD.Site_City,'') As City, IsNull(CSD.Site_State_Cd,'') As Site_State_Cd, IsNull(CSD.Site_State_Desc,'') As State_Desc, IsNull(CSD.Site_GST_No,'') As Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "SD.Party_Id, SD.Invoice_Date, SD.Invoice_No, SD.Total_Installation_Cost, SD.GST_Amount, SD.Net_Invoice_Amount, SD.IGST_Value, SD.CGST_Value, SD.SGST_Value, 0 CESS_Value, SD.SGST_Percentage, SD.CGST_Percentage, SD.IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'SL' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblSale_Entry_Detail SD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = SD.Party_Id"
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = SD.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblClient_Site_Detail CSD ON CSD.Site_Id = SD.Site_Id AND CSD.Party_Id = SD.Party_Id  "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE SD.Tax_Invoice = 1 AND IsNull(SD.Cancelled,0) = 0 AND MONTH(SD.Invoice_Date) = " & intGST_Month & " "
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            ''  Bulk Sale ....
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(SD.Party_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, '' As City, '' As Site_State_Cd, IsNull(SD.Site_State_Desc,'') As State_Desc, IsNull(SD.Site_GST_No,'') As Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "SD.Party_Id, SD.Invoice_Date, SD.Invoice_No, SD.Total_Invoice_Amount As Total_Installation_Cost, SD.GST_Amount, SD.Net_Invoice_Amount, SD.IGST_Value, SD.CGST_Value, SD.SGST_Value, 0 CESS_Value, SD.SGST_Percentage, SD.CGST_Percentage, SD.IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'SL' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblDMart_Invoice_Mast SD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = SD.Party_Id"
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = SD.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE SD.Tax_Invoice = 1 AND IsNull(SD.Cancelled,0) = 0 AND MONTH(SD.Invoice_Date) = " & intGST_Month & " "
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            ''  License_Transfer
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(SD.To_Party_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, IsNull(CSD.Site_City,'') As City, IsNull(CSD.Site_State_Cd,'') As Site_State_Cd, IsNull(CSD.Site_State_Desc,'') As State_Desc, IsNull(CSD.Site_GST_No,'') As Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "SD.To_Party_Id, SD.Invoice_Date, SD.Invoice_No, SD.Total_License_Transfer_Cost As Total_Installation_Cost, SD.GST_Amount, SD.Net_License_Transfer_Amount As Net_Invoice_Amount, SD.IGST_Value, SD.CGST_Value, SD.SGST_Value, 0 CESS_Value, SD.SGST_Percentage, SD.CGST_Percentage, SD.IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'SL' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblLicense_Transfer_Detail SD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = SD.To_Party_Id"
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = SD.To_Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblClient_Site_Detail CSD ON CSD.Site_Id = SD.To_Site_Id AND CSD.Party_Id = SD.To_Party_Id  "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE SD.Tax_Invoice = 1 AND IsNull(SD.Cancelled,0) = 0 AND MONTH(SD.Invoice_Date) = " & intGST_Month & " "
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            ''  License_Upgrade ....
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(SD.Party_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, IsNull(CSD.Site_City,'') As City, IsNull(CSD.Site_State_Cd,'') As Site_State_Cd, IsNull(CSD.Site_State_Desc,'') As State_Desc, IsNull(CSD.Site_GST_No,'') As Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "SD.Party_Id, SD.Invoice_Date, SD.Invoice_No, SD.License_Upgrade_Value As Total_Installation_Cost, SD.GST_Amount, SD.Net_License_Upgrade_Amount As Net_Invoice_Amount, SD.IGST_Value, SD.CGST_Value, SD.SGST_Value, 0 CESS_Value, SD.SGST_Percentage, SD.CGST_Percentage, SD.IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'SL' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblLicense_Upgrade_Detail SD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = SD.Party_Id"
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = SD.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblClient_Site_Detail CSD ON CSD.Site_Id = SD.Site_Id AND CSD.Party_Id = SD.Party_Id  "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE SD.Tax_Invoice = 1 AND IsNull(SD.Cancelled,0) = 0 AND MONTH(SD.Invoice_Date) = " & intGST_Month & " "
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            '' Journal Sale ....
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, "
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.City,'') ELSE ISNULL(PRT.City,'') END) As City, '' Site_State_Cd, "
+            strSQL_String = strSQL_String & vbCrLf & "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE((CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.State_Desc,'') ELSE ISNULL(PRT.State_Desc,'') END),'0','') ,'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9','') As State_Desc,"
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.GST_No,'') ELSE ISNULL(PRT.GST_No,'') END) As Gst_No, JV.GL_SL_Account_Id As Party_Id, "
+            strSQL_String = strSQL_String & vbCrLf & "JV.Bill_Date As Invoice_Date, JV.Bill_No As Invoice_No, JV.Net_Value As Total_Installation_Cost, 0 GST_Amount, JV.Net_Value As Net_Invoice_Amount, GST.IGST_Value, GST.CGST_Value, GST.SGST_Value, GST.CESS_Value, 0 SGST_Percentage, 0 CGST_Percentage, 0 IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'JV' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JM.Journal_Voucher_Id, JM.Journal_Voucher_Date, JM.Journal_Voucher_No, JD.GL_SL_Account_Id, (CASE WHEN LEN(IsNull(JD.Bill_No,'')) > 0 THEN JD.Bill_Date ELSE JM.Journal_Voucher_Date END) As Bill_Date, (CASE WHEN LEN(IsNull(JD.Bill_No,'')) > 0 THEN JD.Bill_No ELSE '' END) As Bill_No, SUM(JD.Debit_Amount) As Net_Value "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Mast JM ON JM.Journal_Voucher_Id = JD.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE JD.Debit_Amount > 0 AND ISNULL(JM.Entry_Mode,'') NOT IN ('1','2','3','4','5','A') "
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY JM.Journal_Voucher_Id, JM.Journal_Voucher_Date, JM.Journal_Voucher_No, JD.GL_SL_Account_Id, JD.Bill_Date, JD.Bill_No "
+            strSQL_String = strSQL_String & vbCrLf & ") JV "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JM.Journal_Voucher_Id, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(CGST.CGST_Account_Id,'')) > 0 THEN JD.Credit_Amount ELSE 0 END) As CGST_Value, SUM(CASE WHEN Len(IsNull(SGST.SGST_Account_Id,'')) > 0 THEN JD.Credit_Amount ELSE 0 END) As SGST_Value, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(IGST.IGST_Account_Id,'')) > 0 THEN JD.Credit_Amount ELSE 0 END) As IGST_Value, SUM(CASE WHEN Len(IsNull(CESS.CESS_Account_Id,'')) > 0 THEN JD.Credit_Amount ELSE 0 END) As CESS_Value "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Mast JM ON JM.Journal_Voucher_Id = JD.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast CGST ON CGST.CGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast SGST ON SGST.SGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast IGST ON IGST.IGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast CESS ON CESS.CESS_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY JM.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & ") GST ON GST.Journal_Voucher_Id = JV.Journal_Voucher_Id "
+            '' Check Sale Account ....
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JD.Journal_Voucher_Id, JD.GL_SL_Account_Id AS SALS_ACC "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE ACM.Type_Of_Account = 4 "
+            strSQL_String = strSQL_String & vbCrLf & ") TOA ON TOA.Journal_Voucher_Id = JV.Journal_Voucher_Id "
+            '' Check Sale Account ....
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = JV.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = JV.GL_SL_Account_Id"
+            strSQL_String = strSQL_String & vbCrLf & "WHERE (GST.IGST_Value + GST.CGST_Value + GST.SGST_Value + GST.CESS_Value) > 0 "
+            strSQL_String = strSQL_String & vbCrLf & "AND MONTH(JV.Journal_Voucher_Date) = " & intGST_Month & " "
+            strSQL_String = strSQL_String & vbCrLf & "AND (JV.Net_Value - (GST.IGST_Value + GST.CGST_Value + GST.SGST_Value + GST.CESS_Value)) > 0.00 "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT Total_GST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT IGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT CGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT SGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT CESS_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND LEN(IsNull(TOA.SALS_ACC,'')) > 0 "
+            '' Journal Sale Return ....
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, "
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.City,'') ELSE ISNULL(PRT.City,'') END) As City, '' Site_State_Cd, "
+            strSQL_String = strSQL_String & vbCrLf & "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE((CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.State_Desc,'') ELSE ISNULL(PRT.State_Desc,'') END),'0','') ,'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9','') As State_Desc,"
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.GST_No,'') ELSE ISNULL(PRT.GST_No,'') END) As Gst_No, JV.GL_SL_Account_Id As Party_Id, "
+            strSQL_String = strSQL_String & vbCrLf & "JV.Journal_Voucher_Date As Invoice_Date, JV.Bill_No As Invoice_No, (JV.Net_Value *-1) As Total_Installation_Cost, 0 GST_Amount, (JV.Net_Value * -1) As Net_Invoice_Amount, (GST.IGST_Value * -1) As IGST_Value, (GST.CGST_Value * -1) As CGST_Value, (GST.SGST_Value * -1) As SGST_Value, (GST.CESS_Value * -1) As CESS_Value, 0 SGST_Percentage, 0 CGST_Percentage, 0 IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'JV' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JM.Journal_Voucher_Id, JM.Journal_Voucher_Date, JM.Journal_Voucher_No, JD.GL_SL_Account_Id, (CASE WHEN LEN(IsNull(JD.Bill_No,'')) > 0 THEN JD.Bill_Date ELSE JM.Journal_Voucher_Date END) As Bill_Date, (CASE WHEN LEN(IsNull(JD.Bill_No,'')) > 0 THEN JD.Bill_No ELSE '' END) As Bill_No, SUM(JD.Credit_Amount) As Net_Value "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Mast JM ON JM.Journal_Voucher_Id = JD.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE JD.Credit_Amount > 0 AND ISNULL(JM.Entry_Mode,'') NOT IN ('1','2','3','4','5','A')"
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY JM.Journal_Voucher_Id, JM.Journal_Voucher_Date, JM.Journal_Voucher_No, JD.GL_SL_Account_Id, JD.Bill_Date, JD.Bill_No "
+            strSQL_String = strSQL_String & vbCrLf & ") JV "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JM.Journal_Voucher_Id, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(CGST.CGST_Account_Id,'')) > 0 THEN JD.Debit_Amount ELSE 0 END) As CGST_Value, SUM(CASE WHEN Len(IsNull(SGST.SGST_Account_Id,'')) > 0 THEN JD.Debit_Amount ELSE 0 END) As SGST_Value, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(IGST.IGST_Account_Id,'')) > 0 THEN JD.Debit_Amount ELSE 0 END) As IGST_Value, SUM(CASE WHEN Len(IsNull(CESS.CESS_Account_Id,'')) > 0 THEN JD.Debit_Amount ELSE 0 END) As CESS_Value "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Mast JM ON JM.Journal_Voucher_Id = JD.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast CGST ON CGST.CGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast SGST ON SGST.SGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast IGST ON IGST.IGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast CESS ON CESS.CESS_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY JM.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & ") GST ON GST.Journal_Voucher_Id = JV.Journal_Voucher_Id "
+            '' Check Sale Account ....
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JD.Journal_Voucher_Id, JD.GL_SL_Account_Id AS SALS_ACC "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE ACM.Type_Of_Account = 4 "
+            strSQL_String = strSQL_String & vbCrLf & ") TOA ON TOA.Journal_Voucher_Id = JV.Journal_Voucher_Id "
+            '' Check Sale Account ....
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = JV.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = JV.GL_SL_Account_Id"
+            strSQL_String = strSQL_String & vbCrLf & "WHERE (GST.IGST_Value + GST.CGST_Value + GST.SGST_Value + GST.CESS_Value) > 0 "
+            strSQL_String = strSQL_String & vbCrLf & "AND MONTH(JV.Journal_Voucher_Date) = " & intGST_Month & " "
+            strSQL_String = strSQL_String & vbCrLf & "AND (JV.Net_Value - (GST.IGST_Value + GST.CGST_Value + GST.SGST_Value + GST.CESS_Value)) > 0.00 "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT Total_GST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT IGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT CGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT SGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT CESS_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND LEN(IsNull(TOA.SALS_ACC,'')) > 0 "
+            '' Support Charges ....
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(SM.Party_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, IsNull(CSD.Site_City,'') As City, IsNull(CSD.Site_State_Cd,'') As Site_State_Cd, IsNull(CSD.Site_State_Desc,'') As State_Desc, IsNull(CSD.Site_GST_No,'') As Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "SM.Party_Id, SM.Invoice_Date, SM.Invoice_No, SM.Gross_Amount As Total_Installation_Cost, SM.GST_Amount, SM.Net_Invoice_Amount, SM.IGST_Value, SM.CGST_Value, SM.SGST_Value, 0 CESS_Value, SM.SGST_Percentage, SM.CGST_Percentage, SM.IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'SL' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblSupport_Charges_Invoice_Mast SM "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = SM.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = SM.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblClient_Site_Detail CSD ON CSD.Site_Id = SM.Site_Id AND CSD.Party_Id = SM.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE SM.Tax_Invoice = 1 AND IsNull(SM.Cancelled,0) = 0 AND MONTH(SM.Invoice_Date) = " & intGST_Month & " "
+            '' General Sale Total
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(SM.Party_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, IsNull(CSD.Site_City,'') As City, IsNull(CSD.Site_State_Cd,'') As Site_State_Cd, IsNull(CSD.Site_State_Desc,'') As State_Desc, IsNull(CSD.Site_GST_No,'') As Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "SM.Party_Id, SM.Invoice_Date, SM.Invoice_No, SM.Total_Installation_Cost, SM.GST_Amount, SM.Net_Invoice_Amount, SM.IGST_Value, SM.CGST_Value, SM.SGST_Value, 0 CESS_Value, SM.SGST_Percentage, SM.CGST_Percentage, SM.IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'SL' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblGeneral_Sale_Entry SM "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = SM.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = SM.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblClient_Site_Detail CSD ON CSD.Site_Id = SM.Site_Id AND CSD.Party_Id = SM.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE SM.Tax_Invoice = 1 AND IsNull(SM.Cancelled,0) = 0  AND MONTH(SM.Invoice_Date) = " & intGST_Month & " "
+            ''  Bulk AMC ....
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(SD.Party_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, '' As City, '' As Site_State_Cd, IsNull(SD.Site_State_Desc,'') As State_Desc, IsNull(SD.Site_GST_No,'') As Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "SD.Party_Id, SD.Invoice_Date, SD.Invoice_No, SD.Total_AMC_Amount As Total_Installation_Cost, SD.GST_Amount, SD.Net_AMC_Amount As Net_Invoice_Amount, SD.IGST_Value, SD.CGST_Value, SD.SGST_Value, 0 CESS_Value, SD.SGST_Percentage, SD.CGST_Percentage, SD.IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'SL' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblDMart_AMC_Mast SD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = SD.Party_Id"
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = SD.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE SD.Tax_Invoice = 1 AND IsNull(SD.Cancelled,0) = 0 AND MONTH(SD.Invoice_Date) = " & intGST_Month & " "
+            ''  AMC....
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(SD.Party_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, IsNull(CSD.Site_City,'') As City, IsNull(CSD.Site_State_Cd,'') As Site_State_Cd, IsNull(CSD.Site_State_Desc,'') As State_Desc, IsNull(CSD.Site_GST_No,'') As Gst_No,"
+            strSQL_String = strSQL_String & vbCrLf & "SD.Party_Id, SD.Invoice_Date, SD.Invoice_No, (SD.Total_AMC_Amount - SD.Special_Discount_Value) As Total_Installation_Cost, SD.GST_Amount, SD.Net_AMC_Amount As Net_Invoice_Amount, SD.IGST_Value, SD.CGST_Value, SD.SGST_Value, 0 CESS_Value, SD.SGST_Percentage, SD.CGST_Percentage, SD.IGST_Percentage, 0 CESS_Percentage, Voucher_Type = 'SL' "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblAMC_Detail SD"
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = SD.Party_Id"
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = SD.Party_Id"
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblClient_Site_Detail CSD ON CSD.Site_Id = SD.Site_Id AND CSD.Party_Id = SD.Party_Id"
+            strSQL_String = strSQL_String & vbCrLf & "WHERE SD.Tax_Invoice = 1 AND IsNull(SD.Cancelled,0) = 0 AND MONTH(SD.Invoice_Date) = " & intGST_Month & " "
+            strSQL_String = strSQL_String & vbCrLf & ") SD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = SD.Party_Id"
+
+            strSQL_String = strSQL_String & vbCrLf & ") SD "
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY DATEPART(MONTH,SD.Invoice_Date), DATENAME(MONTH,SD.Invoice_Date), DATEPART(YEAR,SD.Invoice_Date) "
+            ''''''  Purchase Records
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            strSQL_String = strSQL_String & vbCrLf & "SELECT INDX_WORD = 'C1', GROUP_CALC = 'C', Voucher_Type = 'TOT', GROUP_WORD = 'C', DATEPART(MONTH,SD.Journal_Voucher_Date) AS Month_No, DATENAME(MONTH,SD.Journal_Voucher_Date) As Month_Name, DATEPART(YEAR,SD.Journal_Voucher_Date) AS Year_Name, "
+            strSQL_String = strSQL_String & vbCrLf & "0 Sal_Gross_Amount, SUM(SD.Net_Value - (SD.IGst_Value + SD.CGst_Value + SD.SGst_Value + SD.CESS_Value)) As Pur_Gross_Amount, "
+            strSQL_String = strSQL_String & vbCrLf & "0 Sal_IGST_Value, SUM(SD.IGST_Value) As Pur_IGST_Value, 0 Sal_CGST_Value, SUM(SD.CGST_Value) As Pur_CGST_Value, 0 Sal_SGST_Value, SUM(SD.SGST_Value) As Pur_SGST_Value, "
+            strSQL_String = strSQL_String & vbCrLf & "0 Sal_Gst_Amount, SUM((SD.IGST_Value + SD.CGST_Value + SD.SGST_Value + SD.CESS_Value)) As Pur_Gst_Amount, 0 Sal_Net_Amount, SUM(SD.Net_Value) As Pur_Net_Amount "
+            strSQL_String = strSQL_String & vbCrLf & "FROM ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT ROW_NUMBER()OVER(ORDER BY JV.Journal_Voucher_Date, JV.Journal_Voucher_No) AS Sr_No, JV.* FROM ( "
+            '' Opening Balance GST Bill
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(GOP.Party_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc,"
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(GOP.Party_Id) = 1 THEN ISNULL(ACM.City,'') ELSE ISNULL(PRT.City,'') END) As City,"
+            strSQL_String = strSQL_String & vbCrLf & "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE((CASE WHEN ISNUMERIC(GOP.Party_Id) = 1 THEN ISNULL(ACM.State_Desc,'') ELSE ISNULL(PRT.State_Desc,'') END),'0','') ,'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9','')  As State_Desc,"
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(GOP.Party_Id) = 1 THEN ISNULL(ACM.GST_No,'') ELSE ISNULL(PRT.GST_No,'') END) As Gst_No,"
+            strSQL_String = strSQL_String & vbCrLf & "IsNull(GOP.Invoice_Date,'') As Bill_Date, GOP.Invoice_No As Bill_No, GOP.Date_Of_Opening As Journal_Voucher_Date, '' Journal_Voucher_No, GOP.Party_Id As GL_SL_Account_Id, GOP.Bill_Amount As Net_Value, GOP.IGST_Amount As IGST_Value, GOP.CGST_Amount As CGST_Value, GOP.SGST_Amount As SGST_Value, 0 CESS_Value, IsNull(ACM.SAC_Code,'') As SAC_Code"
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblOpening_GST_Bills GOP "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = GOP.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = GOP.Party_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE GOP.Opening_Type = 0 AND MONTH(GOP.Date_Of_Opening) <= " & intGST_Month
+            '' Opening Balance GST Bill
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, "
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.City,'') ELSE ISNULL(PRT.City,'') END) As City, "
+            strSQL_String = strSQL_String & vbCrLf & "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE((CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.State_Desc,'') ELSE ISNULL(PRT.State_Desc,'') END),'0','') ,'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9','') As State_Desc, "
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.GST_No,'') ELSE ISNULL(PRT.GST_No,'') END) As Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "IsNull(JV.Bill_Date,'') As Bill_Date, JV.Bill_No, JV.Journal_Voucher_Date, JV.Journal_Voucher_No, JV.GL_SL_Account_Id, JV.Net_Value, GST.IGST_Value, GST.CGST_Value, GST.SGST_Value, GST.CESS_Value, IsNull(ACM.SAC_Code,'') As SAC_Code "
+            strSQL_String = strSQL_String & vbCrLf & "FROM ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JM.Journal_Voucher_Id, JM.Journal_Voucher_Date, JM.Journal_Voucher_No, JD.GL_SL_Account_Id, (CASE WHEN LEN(IsNull(JD.Bill_No,'')) > 0 THEN JD.Bill_Date ELSE JM.Journal_Voucher_Date END) As Bill_Date, (CASE WHEN LEN(IsNull(JD.Bill_No,'')) > 0 THEN JD.Bill_No ELSE '' END) As Bill_No, SUM(JD.Credit_Amount) As Net_Value "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Mast JM ON JM.Journal_Voucher_Id = JD.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE JD.Credit_Amount > 0 AND ISNULL(JM.Entry_Mode,'') NOT IN ('1','2','3','4','5','A')"
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY JM.Journal_Voucher_Id, JM.Journal_Voucher_Date, JM.Journal_Voucher_No, JD.GL_SL_Account_Id, JD.Bill_Date, JD.Bill_No "
+            strSQL_String = strSQL_String & vbCrLf & ") JV "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JM.Journal_Voucher_Id, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(CGST.CGST_Account_Id,'')) > 0 THEN JD.Debit_Amount ELSE 0 END) As CGST_Value, SUM(CASE WHEN Len(IsNull(SGST.SGST_Account_Id,'')) > 0 THEN JD.Debit_Amount ELSE 0 END) As SGST_Value, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(IGST.IGST_Account_Id,'')) > 0 THEN JD.Debit_Amount ELSE 0 END) As IGST_Value, SUM(CASE WHEN Len(IsNull(CESS.CESS_Account_Id,'')) > 0 THEN JD.Debit_Amount ELSE 0 END) As CESS_Value, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(CGST.CGST_Account_Id,'')) > 0 THEN CGST.CGST_Percentage ELSE 0 END) As CGST_Rate, SUM(CASE WHEN Len(IsNull(SGST.SGST_Account_Id,'')) > 0 THEN SGST.SGST_Percentage ELSE 0 END) As SGST_Rate, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(IGST.IGST_Account_Id,'')) > 0 THEN IGST.IGST_Percentage ELSE 0 END) As IGST_Rate, SUM(CASE WHEN Len(IsNull(CESS.CESS_Account_Id,'')) > 0 THEN CESS.CESS_Percentage ELSE 0 END) As CESS_Rate "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Mast JM ON JM.Journal_Voucher_Id = JD.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast CGST ON CGST.CGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast SGST ON SGST.SGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast IGST ON IGST.IGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast CESS ON CESS.CESS_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY JM.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & ") GST ON GST.Journal_Voucher_Id = JV.Journal_Voucher_Id "
+            '' Check Purchase Account ....
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JD.Journal_Voucher_Id, JD.GL_SL_Account_Id AS PURC_ACC "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE ACM.Type_Of_Account IN (3,5)"
+            strSQL_String = strSQL_String & vbCrLf & ") TOA ON TOA.Journal_Voucher_Id = JV.Journal_Voucher_Id "
+            '' Check Purchase Account ....
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = JV.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = JV.GL_SL_Account_Id"
+            strSQL_String = strSQL_String & vbCrLf & "WHERE (GST.IGST_Value + GST.CGST_Value + GST.SGST_Value + GST.CESS_Value) > 0 "
+            strSQL_String = strSQL_String & vbCrLf & "AND MONTH(JV.Journal_Voucher_Date) = " & intGST_Month & " "
+            strSQL_String = strSQL_String & vbCrLf & "AND (JV.Net_Value - (GST.IGST_Value + GST.CGST_Value + GST.SGST_Value + GST.CESS_Value)) > 0.00 "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT Total_GST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT IGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT CGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT SGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT CESS_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND LEN(IsNull(TOA.PURC_ACC,'')) > 0 "
+            strSQL_String = strSQL_String & vbCrLf & ") JV "
+            ''''''  Purchase Return Start
+            strSQL_String = strSQL_String & vbCrLf & "UNION ALL"
+            strSQL_String = strSQL_String & vbCrLf & "SELECT ROW_NUMBER()OVER(ORDER BY JV.Journal_Voucher_Date, JV.Journal_Voucher_No) AS Sr_No, JV.* FROM ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT (CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.Account_Desc,'') ELSE ISNULL(PRT.Party_Desc,'') END) As Party_Desc, "
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.City,'') ELSE ISNULL(PRT.City,'') END) As City, "
+            strSQL_String = strSQL_String & vbCrLf & "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE((CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.State_Desc,'') ELSE ISNULL(PRT.State_Desc,'') END),'0','') ,'1',''),'2',''),'3',''),'4',''),'5',''),'6',''),'7',''),'8',''),'9','') As State_Desc, "
+            strSQL_String = strSQL_String & vbCrLf & "(CASE WHEN ISNUMERIC(JV.GL_SL_Account_Id) = 1 THEN ISNULL(ACM.GST_No,'') ELSE ISNULL(PRT.GST_No,'') END) As Gst_No, "
+            strSQL_String = strSQL_String & vbCrLf & "IsNull(JV.Journal_Voucher_Date,'') As Bill_Date, JV.Bill_No, JV.Journal_Voucher_Date, JV.Journal_Voucher_No, JV.GL_SL_Account_Id, (JV.Net_Value * -1) As Net_Value, (GST.IGST_Value * -1) As IGST_Value, (GST.CGST_Value * -1) As CGST_Value, (GST.SGST_Value * -1) As SGST_Value, (GST.CESS_Value * -1) As CESS_Value, IsNull(ACM.SAC_Code,'') As SAC_Code "
+            strSQL_String = strSQL_String & vbCrLf & "FROM ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JM.Journal_Voucher_Id, JM.Journal_Voucher_Date, JM.Journal_Voucher_No, JD.GL_SL_Account_Id, (CASE WHEN LEN(IsNull(JD.Bill_No,'')) > 0 THEN JD.Bill_Date ELSE JM.Journal_Voucher_Date END) As Bill_Date, (CASE WHEN LEN(IsNull(JD.Bill_No,'')) > 0 THEN JD.Bill_No ELSE '' END) As Bill_No, SUM(JD.Debit_Amount) As Net_Value "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Mast JM ON JM.Journal_Voucher_Id = JD.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE JD.Debit_Amount > 0 AND ISNULL(JM.Entry_Mode,'') NOT IN ('1','2','3','4','5','A')"
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY JM.Journal_Voucher_Id, JM.Journal_Voucher_Date, JM.Journal_Voucher_No, JD.GL_SL_Account_Id, JD.Bill_Date, JD.Bill_No "
+            strSQL_String = strSQL_String & vbCrLf & ") JV "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JM.Journal_Voucher_Id, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(CGST.CGST_Account_Id,'')) > 0 THEN JD.Credit_Amount ELSE 0 END) As CGST_Value, SUM(CASE WHEN Len(IsNull(SGST.SGST_Account_Id,'')) > 0 THEN JD.Credit_Amount ELSE 0 END) As SGST_Value, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(IGST.IGST_Account_Id,'')) > 0 THEN JD.Credit_Amount ELSE 0 END) As IGST_Value, SUM(CASE WHEN Len(IsNull(CESS.CESS_Account_Id,'')) > 0 THEN JD.Credit_Amount ELSE 0 END) As CESS_Value, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(CGST.CGST_Account_Id,'')) > 0 THEN CGST.CGST_Percentage ELSE 0 END) As CGST_Rate, SUM(CASE WHEN Len(IsNull(SGST.SGST_Account_Id,'')) > 0 THEN SGST.SGST_Percentage ELSE 0 END) As SGST_Rate, "
+            strSQL_String = strSQL_String & vbCrLf & "SUM(CASE WHEN Len(IsNull(IGST.IGST_Account_Id,'')) > 0 THEN IGST.IGST_Percentage ELSE 0 END) As IGST_Rate, SUM(CASE WHEN Len(IsNull(CESS.CESS_Account_Id,'')) > 0 THEN CESS.CESS_Percentage ELSE 0 END) As CESS_Rate "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Mast JM ON JM.Journal_Voucher_Id = JD.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast CGST ON CGST.CGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast SGST ON SGST.SGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast IGST ON IGST.IGST_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblGST_Mast CESS ON CESS.CESS_Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY JM.Journal_Voucher_Id "
+            strSQL_String = strSQL_String & vbCrLf & ") GST ON GST.Journal_Voucher_Id = JV.Journal_Voucher_Id "
+            '' Check Purchase Account ....
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT JD.Journal_Voucher_Id, JD.GL_SL_Account_Id AS PURC_ACC "
+            strSQL_String = strSQL_String & vbCrLf & "FROM [" & gstrFYDatabaseName & "].DBO.tblJournal_Voucher_Detail JD "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = JD.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE ACM.Type_Of_Account IN (3,5) "
+            strSQL_String = strSQL_String & vbCrLf & ") TOA ON TOA.Journal_Voucher_Id = JV.Journal_Voucher_Id "
+            '' Check Purchase Account ....
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblParty_Mast PRT ON PRT.Party_Id = JV.GL_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast ACM ON ACM.Account_Id = JV.GL_SL_Account_Id"
+            strSQL_String = strSQL_String & vbCrLf & "WHERE (GST.IGST_Value + GST.CGST_Value + GST.SGST_Value + GST.CESS_Value) > 0 "
+            strSQL_String = strSQL_String & vbCrLf & "AND MONTH(JV.Journal_Voucher_Date) = " & intGST_Month & " "
+            strSQL_String = strSQL_String & vbCrLf & "AND (JV.Net_Value - (GST.IGST_Value + GST.CGST_Value + GST.SGST_Value + GST.CESS_Value)) > 0.00 "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT Total_GST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT IGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT CGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT SGST_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND JV.GL_SL_Account_Id NOT IN (SELECT CESS_Account_Id FROM tblGST_Mast) "
+            strSQL_String = strSQL_String & vbCrLf & "AND LEN(IsNull(TOA.PURC_ACC,'')) > 0 "
+            strSQL_String = strSQL_String & vbCrLf & ") JV "
+            ''''''  Purchase Return End
+            strSQL_String = strSQL_String & vbCrLf & ") SD "
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY DATEPART(MONTH,SD.Journal_Voucher_Date), DATENAME(MONTH,SD.Journal_Voucher_Date), DATEPART(YEAR,SD.Journal_Voucher_Date) "
+            strSQL_String = strSQL_String & vbCrLf & ") SAL"
+            '' GST Paid Quary ....
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT DATEPART(MONTH,LED.Voucher_Date) AS Month_No, DATENAME(MONTH,LED.Voucher_Date) As Month_Name, DATEPART(YEAR,LED.Voucher_Date) AS Year_Name, "
+            strSQL_String = strSQL_String & vbCrLf & "LED.Ledger_GL_Account_Id, SUM(LED.Debit_Amount) As GST_Paid_Amount, (CASE WHEN DATEPART(MONTH,LED.Voucher_Date) = 1 THEN 12 ELSE DATEPART(MONTH,LED.Voucher_Date)-1 END) As GST_Month FROM [" & gstrFYDatabaseName & "].[dbo].[tblLedger] LED "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN tblAccount_Mast AM ON AM.Account_Id = LED.Cross_SL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & "WHERE (LED.Voucher_Type = 'BNK' OR LED.Voucher_Type = 'JOU') AND LED.Ledger_GL_Account_Id IN (SELECT Total_GST_Account_Id FROM tblGST_Mast) AND DATEPART(MONTH,LED.Voucher_Date) <> 4 "
+            strSQL_String = strSQL_String & vbCrLf & "AND AM.Type_Of_Account IN (2,10)"
+            strSQL_String = strSQL_String & vbCrLf & "GROUP BY DATEPART(MONTH,LED.Voucher_Date), DATENAME(MONTH,LED.Voucher_Date), DATEPART(YEAR,LED.Voucher_Date), LED.Ledger_GL_Account_Id "
+            strSQL_String = strSQL_String & vbCrLf & ") GSP ON GSP.GST_Month = SAL.Month_No "
+            strSQL_String = strSQL_String & vbCrLf & "LEFT OUTER JOIN ( "
+            strSQL_String = strSQL_String & vbCrLf & "SELECT SUM(Total_GST) As Total_GST, To_Be_Availed_In FROM [" & gstrFYDatabaseName & "].DBO.tblGST_Opening_Balance GROUP BY To_Be_Availed_In "
+            strSQL_String = strSQL_String & vbCrLf & ") GOP ON GOP.To_Be_Availed_In = SAL.Month_No "
+        ElseIf strTAG = "<YSIPL TDS 1002>" Or strTAG = "<YSI TDS 1002>" Then
+            strSQL_String = "SELECT ISNULL(SUM(TDSD.TDS_Amount),0) AS TDS_Amount FROM [" & gstrFYDatabaseName & "].dbo.tblTDS_Head_Detail TDSD"
+            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN [" & gstrFYDatabaseName & "].dbo.tblTDS_Head_Mast TDSM ON TDSM.TDS_Head_Id = TDSD.TDS_Head_Id"
+            strSQL_String = strSQL_String & vbCrLf & "where TDSM.TDS_Section = 5 AND TDSD.Month_No=" & intGST_Month
+        ElseIf strTAG = "<YSIPL TDS 1027>" Or strTAG = "<YSI TDS 1027>" Then
+            strSQL_String = "SELECT ISNULL(SUM(TDSD.TDS_Amount),0) AS TDS_Amount FROM [" & gstrFYDatabaseName & "].dbo.tblTDS_Head_Detail TDSD"
+            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN [" & gstrFYDatabaseName & "].dbo.tblTDS_Head_Mast TDSM ON TDSM.TDS_Head_Id = TDSD.TDS_Head_Id"
+            strSQL_String = strSQL_String & vbCrLf & "where TDSM.TDS_Section = 6 and TDS_Code = 0 AND TDSD.Month_No=" & intGST_Month
+        ElseIf strTAG = "<YSIPL TDS 1009>" Or strTAG = "<YSI TDS 1009>" Then
+            strSQL_String = "SELECT ISNULL(SUM(TDSD.TDS_Amount),0) AS TDS_Amount FROM [" & gstrFYDatabaseName & "].dbo.tblTDS_Head_Detail TDSD"
+            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN [" & gstrFYDatabaseName & "].dbo.tblTDS_Head_Mast TDSM ON TDSM.TDS_Head_Id = TDSD.TDS_Head_Id"
+            strSQL_String = strSQL_String & vbCrLf & "where TDSM.TDS_Section = 6 and TDS_Code = 1 AND TDSD.Month_No=" & intGST_Month
+        ElseIf strTAG = "<YSIPL TDS 1023>" Or strTAG = "<YSI TDS 1023>" Then
+            strSQL_String = "SELECT ISNULL(SUM(TDSD.TDS_Amount),0) AS TDS_Amount FROM [" & gstrFYDatabaseName & "].dbo.tblTDS_Head_Detail TDSD"
+            strSQL_String = strSQL_String & vbCrLf & "INNER JOIN [" & gstrFYDatabaseName & "].dbo.tblTDS_Head_Mast TDSM ON TDSM.TDS_Head_Id = TDSD.TDS_Head_Id"
+            strSQL_String = strSQL_String & vbCrLf & "where TDSM.TDS_Section = 6 and TDS_Code = 2 AND TDSD.Month_No=" & intGST_Month
         End If
-        If strTAG = "<YSI CGST>" Then
-            strMessage = Replace(strMessage, "<YSI CGST>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSI SGST>" Then
-            strMessage = Replace(strMessage, "<YSI SGST>", Year(Date.Today.ToString()) & "")
-        End If
-        If strTAG = "<YSI NET GST>" Then
-            strMessage = Replace(strMessage, "<YSI NET GST>", Year(Date.Today.ToString()) & "")
+        Dim adoRs_Stock As New DataSet
+        Using adapter As New SqlDataAdapter
+            adapter.SelectCommand = New SqlCommand(strSQL_String, adoSMS)
+            adapter.SelectCommand.CommandTimeout = 0
+            adapter.Fill(adoRs_Stock)
+        End Using
+        If adoRs_Stock.Tables(0).Rows.Count > 0 Then
+            Dim decAmount As Decimal
+            With adoRs_Stock.Tables(0).Rows(0)
+                If strTAG = "<YSIPL TDS 1023>" Then
+                    decAmount = Val(!TDS_Amount)
+                    strMessage = Replace(strMessage, "<YSIPL TDS 1023>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                ElseIf strTAG = "<YSI TDS 1023>" Then
+                    decAmount = Val(!TDS_Amount)
+                    strMessage = Replace(strMessage, "<YSI TDS 1023>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                ElseIf strTAG = "<YSIPL TDS 1009>" Then
+                    decAmount = Val(!TDS_Amount)
+                    strMessage = Replace(strMessage, "<YSIPL TDS 1009>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                ElseIf strTAG = "<YSI TDS 1009>" Then
+                    decAmount = Val(!TDS_Amount)
+                    strMessage = Replace(strMessage, "<YSI TDS 1009>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                ElseIf strTAG = "<YSIPL TDS 1027>" Then
+                    decAmount = Val(!TDS_Amount)
+                    strMessage = Replace(strMessage, "<YSIPL TDS 1027>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                ElseIf strTAG = "<YSI TDS 1027>" Then
+                    decAmount = Val(!TDS_Amount)
+                    strMessage = Replace(strMessage, "<YSI TDS 1027>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                ElseIf strTAG = "<YSIPL TDS 1002>" Then
+                    decAmount = Val(!TDS_Amount)
+                    strMessage = Replace(strMessage, "<YSIPL TDS 1002>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                ElseIf strTAG = "<YSI TDS 1002>" Then
+                    decAmount = Val(!TDS_Amount)
+                    strMessage = Replace(strMessage, "<YSI TDS 1002>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                ElseIf strTAG = "<YSIPL IGST>" Then
+                    decAmount = Val(!IGST_Value)
+                    strMessage = Replace(strMessage, "<YSIPL IGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    decAmount = Val(!CGST_Value)
+                    strMessage = Replace(strMessage, "<YSIPL CGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    decAmount = Val(!SGST_Value)
+                    strMessage = Replace(strMessage, "<YSIPL SGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    decAmount = Val(!IGST_Value) + Val(!CGST_Value) + Val(!SGST_Value)
+                    strMessage = Replace(strMessage, "<YSIPL NET GST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                ElseIf strTAG = "<YSI IGST>" Then
+                    decAmount = Val(!IGST_Value)
+                    strMessage = Replace(strMessage, "<YSI IGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    decAmount = Val(!CGST_Value)
+                    strMessage = Replace(strMessage, "<YSI CGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    decAmount = Val(!SGST_Value)
+                    strMessage = Replace(strMessage, "<YSI SGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    decAmount = Val(!IGST_Value) + Val(!CGST_Value) + Val(!SGST_Value)
+                    strMessage = Replace(strMessage, "<YSI NET GST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                End If
+            End With
         End If
     End Function
 
@@ -2207,7 +2549,6 @@ Public Class OMS_Dongle
                 '    Server_Schedule()
                 'ElseIf gstrHasp_LockId = "1917058163" Then
                 'End If
-
                 If strGetLocalIPv4 = "192.168.100.249" Then
                     Send_Email_To_Client()
                     OMS_Event_SMS_Send()
@@ -2216,6 +2557,18 @@ Public Class OMS_Dongle
             End If
         End If
     End Sub
+
+    Public Function ExecuteScalarValue(ByVal adoCon_Publication As SqlConnection, ByVal strSQL As String) As Object
+        Try
+            Using cmd As New SqlCommand(strSQL, adoCon_Publication)
+                cmd.CommandTimeout = 0
+                Return cmd.ExecuteScalar()
+            End Using
+        Catch ex As Exception
+            Print_Error_Only("ExecuteScalarValue : " & vbCrLf & strSQL, ex)
+            Throw
+        End Try
+    End Function
 
     Public Function GetLocalIPv4() As String
         For Each ip As IPAddress In Dns.GetHostAddresses(Dns.GetHostName())
