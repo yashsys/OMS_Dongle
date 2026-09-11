@@ -1569,24 +1569,25 @@ Public Class OMS_Dongle
                         lngEvent_Id = Val(.Item("Event_Id"))
                         strEvent_Days = Trim(.Item("Event_Days") & "")
                         strMobile_No = Trim(.Item("Event_Member_Mobile_No") & "")
-                        If Len(strMobile_No) = 10 Then
+                        If Len(strMobile_No) = 10 And Val(.Item("Send_SMS_Member1_Mobile")) = 1 Then
                             strMobile_No = "91" & strMobile_No
                         End If
-                        If Len(Trim(.Item("SMS1_Mobile_No") & "")) >= 10 Then
+
+                        If Len(Trim(.Item("SMS1_Mobile_No") & "")) >= 10 And Val(.Item("Send_SMS_Member2_Mobile")) = 1 Then
                             If Len(Trim(.Item("SMS1_Mobile_No") & "")) = 10 Then
                                 strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS1_Mobile_No") & "")
                             Else
                                 strMobile_No = strMobile_No & "," & Trim(.Item("SMS1_Mobile_No") & "")
                             End If
                         End If
-                        If Len(Trim(.Item("SMS2_Mobile_No") & "")) >= 10 Then
+                        If Len(Trim(.Item("SMS2_Mobile_No") & "")) >= 10 And Val(.Item("Send_SMS_Member3_Mobile")) = 1 Then
                             If Len(Trim(.Item("SMS2_Mobile_No") & "")) = 10 Then
                                 strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS2_Mobile_No") & "")
                             Else
                                 strMobile_No = strMobile_No & "," & Trim(.Item("SMS2_Mobile_No") & "")
                             End If
                         End If
-                        If Len(Trim(.Item("SMS3_Mobile_No") & "")) >= 10 Then
+                        If Len(Trim(.Item("SMS3_Mobile_No") & "")) >= 10 And Val(.Item("Send_SMS_Member4_Mobile")) = 1 Then
                             If Len(Trim(.Item("SMS3_Mobile_No") & "")) = 10 Then
                                 strMobile_No = strMobile_No & "," & "91" & Trim(.Item("SMS3_Mobile_No") & "")
                             Else
@@ -2102,23 +2103,63 @@ Public Class OMS_Dongle
                     decAmount = Val(!TDS_Amount)
                     strMessage = Replace(strMessage, "<YSI TDS 1002>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
                 ElseIf strTAG = "<YSIPL IGST>" Then
-                    decAmount = Val(!IGST_Value)
-                    strMessage = Replace(strMessage, "<YSIPL IGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    If Val(!IGST_Value) > 0 And (Val(!CGST_Value) + Val(!SGST_Value)) < 0 Then
+                        decAmount = Val(!IGST_Value) + (Val(!CGST_Value) + Val(!SGST_Value))
+                    Else
+                        decAmount = Val(!IGST_Value)
+                    End If
+                    If decAmount > 0 Then
+                        decAmount = Val(!IGST_Value)
+                        strMessage = Replace(strMessage, "<YSIPL IGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    Else
+                        strMessage = Replace(strMessage, "<YSIPL IGST>", "-- NIL --")
+                    End If
                     decAmount = Val(!CGST_Value)
-                    strMessage = Replace(strMessage, "<YSIPL CGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    If decAmount > 0 Then
+                        strMessage = Replace(strMessage, "<YSIPL CGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    Else
+                        strMessage = Replace(strMessage, "<YSIPL CGST>", "-- NIL --")
+                    End If
                     decAmount = Val(!SGST_Value)
-                    strMessage = Replace(strMessage, "<YSIPL SGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    If decAmount > 0 Then
+                        strMessage = Replace(strMessage, "<YSIPL SGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    Else
+                        strMessage = Replace(strMessage, "<YSIPL SGST>", "-- NIL --")
+                    End If
                     decAmount = Val(!IGST_Value) + Val(!CGST_Value) + Val(!SGST_Value)
-                    strMessage = Replace(strMessage, "<YSIPL NET GST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    If decAmount > 0 Then
+                        strMessage = Replace(strMessage, "<YSIPL NET GST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    Else
+                        strMessage = Replace(strMessage, "<YSIPL NET GST>", "-- NIL --")
+                    End If
                 ElseIf strTAG = "<YSI IGST>" Then
                     decAmount = Val(!IGST_Value)
-                    strMessage = Replace(strMessage, "<YSI IGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    If decAmount > 0 Then
+                        strMessage = Replace(strMessage, "<YSI IGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    Else
+                        strMessage = Replace(strMessage, "<YSI IGST>", "-- NIL --")
+                    End If
+
                     decAmount = Val(!CGST_Value)
-                    strMessage = Replace(strMessage, "<YSI CGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    If decAmount > 0 Then
+                        strMessage = Replace(strMessage, "<YSI CGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    Else
+                        strMessage = Replace(strMessage, "<YSI CGST>", "-- NIL --")
+                    End If
+
                     decAmount = Val(!SGST_Value)
-                    strMessage = Replace(strMessage, "<YSI SGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    If decAmount > 0 Then
+                        strMessage = Replace(strMessage, "<YSI SGST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    Else
+                        strMessage = Replace(strMessage, "<YSI SGST>", "-- NIL --")
+                    End If
+
                     decAmount = Val(!IGST_Value) + Val(!CGST_Value) + Val(!SGST_Value)
-                    strMessage = Replace(strMessage, "<YSI NET GST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    If decAmount > 0 Then
+                        strMessage = Replace(strMessage, "<YSI NET GST>", decAmount.ToString("N0", Globalization.CultureInfo.GetCultureInfo("en-IN")))
+                    Else
+                        strMessage = Replace(strMessage, "<YSI NET GST>", "-- NIL --")
+                    End If
                 End If
             End With
         End If
